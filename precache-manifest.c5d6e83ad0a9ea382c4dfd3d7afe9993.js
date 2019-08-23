@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "3fca7b5bdc14ebcb2f10a248bc412115",
+    "revision": "12164d5acba8488ba60abc7e8d66c83d",
     "url": "/react-mindmap/index.html"
   },
   {
-    "revision": "28f59c2821bcfac00e89",
+    "revision": "d8275f8b8a4a4f4f93b5",
     "url": "/react-mindmap/static/css/main.845d84ef.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/react-mindmap/static/js/2.7981a421.chunk.js"
   },
   {
-    "revision": "28f59c2821bcfac00e89",
-    "url": "/react-mindmap/static/js/main.5b18ac8e.chunk.js"
+    "revision": "d8275f8b8a4a4f4f93b5",
+    "url": "/react-mindmap/static/js/main.273d4fa3.chunk.js"
   },
   {
     "revision": "eef1d4f056a7e23c9024",
