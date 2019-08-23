@@ -1,8 +1,9 @@
 {
   "name": "react-mindmap",
   "version": "0.1.0",
-  "private": true,
+  "license": "MIT",
   "dependencies": {
+    "blink-mind-react": "^0.1.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.1"
