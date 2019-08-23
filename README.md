@@ -2,6 +2,7 @@ This is a web mindmap app using [blink-mind-react](https://github.com/awehook/bl
 
 ### Online Demo
 
+[Demo](https://awehook.github.io/react-mindmap/)
 
 ### How to run
 ```
