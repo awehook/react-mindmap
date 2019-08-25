@@ -42,6 +42,8 @@ export class MindMap extends React.Component {
   }
 
   onChange = diagramState => {
+    console.log('onChange');
+    console.log(diagramState.mindMapModel);
     this.setState({ diagramState });
   };
 

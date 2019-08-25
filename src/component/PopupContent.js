@@ -11,7 +11,7 @@ export function PopupExportContent(props) {
     const data = convertMindMapModelToRaw(model);
     let json = JSON.stringify(data);
     let url = `data:text/plain,${encodeURIComponent(json)}`;
-    downloadFile(url,`${model.getRootItem().getContent()}.json`);
+    downloadFile(url,`${data.title}.json`);
     Popup.close();
   };
 
@@ -37,6 +37,7 @@ export function PopupOpenFileContent(props) {
       fr.onload = evt => {
         const txt = evt.target.result;
         let obj = JSON.parse(txt);
+        console.log(obj);
         let model = convertRawToMindMapModel(obj);
         let newDiagramState = DiagramState.setMindMapModel(diagramState,model);
         onChange(newDiagramState);

@@ -9,11 +9,11 @@ export class ToolbarItem extends React.Component {
   }
   onClick = () => {
     console.log("toolbar item click");
-    let config = this.props.config;
+    let {config,diagramState,onChange} = this.props;
     if (config.opType) {
       this.props.op(config.opType, null);
     } else if(config.clickHandler) {
-      config.clickHandler();
+      config.clickHandler(diagramState,onChange);
     }
   };
 

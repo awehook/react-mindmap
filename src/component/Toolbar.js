@@ -3,7 +3,7 @@ import { ToolbarItem, ToolbarItemConfig } from "./ToolbarItem";
 import "./Toolbar.css";
 import { OpType, DiagramState } from "blink-mind-react";
 
-import {PopupExportContent, PopupOpenFileContent} from "./PopupContent";
+import { PopupExportContent, PopupOpenFileContent } from "./PopupContent";
 
 import Popup from "react-popup";
 
@@ -23,11 +23,16 @@ export class Toolbar extends React.Component {
     Popup.plugins().popupExport();
   };
 
-  showPopupOpenFile = (diagramState,onChange) => {
+  showPopupOpenFile = (diagramState, onChange) => {
     Popup.registerPlugin("popupOpenFile", function() {
       this.create({
         title: "打开文件",
-        content: <PopupOpenFileContent diagramState={diagramState} onChange={onChange} />
+        content: (
+          <PopupOpenFileContent
+            diagramState={diagramState}
+            onChange={onChange}
+          />
+        )
       });
     });
     Popup.plugins().popupOpenFile();
@@ -42,12 +47,12 @@ export class Toolbar extends React.Component {
     {
       icon: "openfile",
       label: "open file",
-      clickHandler: this.showPopupOpenFile.bind(this, this.props.diagramState,this.props.onChange)
+      clickHandler: this.showPopupOpenFile
     },
     {
       icon: "export",
       label: "export file",
-      clickHandler: this.showPopupExport.bind(this, this.props.diagramState)
+      clickHandler: this.showPopupExport
     },
     {
       icon: "undo",
@@ -83,12 +88,13 @@ export class Toolbar extends React.Component {
   };
 
   render() {
-    let { diagramState } = this.props;
+    let { diagramState, onChange } = this.props;
     let toolbarItems = this.items.map(item => (
       <ToolbarItem
         config={item}
         key={item.label}
         diagramState={diagramState}
+        onChange={onChange}
         op={this.op}
       />
     ));
