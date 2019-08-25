@@ -1,14 +1,13 @@
-import React from 'react';
-import MindMap from './mindmap';
-import './App.css';
+import React from "react";
+import MindMap from "./component/MindMap";
+import "./App.css";
+import "./popup.css"
 
 function App() {
   return (
-    <div className="App">
-      <div className="container">
-        <MindMap/>
-      </div>
-    </div>
+    <>
+      <MindMap />
+    </>
   );
 }
 
