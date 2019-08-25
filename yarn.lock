@@ -6153,6 +6153,11 @@ jsx-ast-utils@^2.1.0, jsx-ast-utils@^2.2.1:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
 
+keymaster@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.npm.taobao.org/keymaster/download/keymaster-1.6.2.tgz#e1ae54d0ea9488f9f60b66b668f02e9a1946c6eb"
+  integrity sha1-4a5U0OqUiPn2C2a2aPAumhlGxus=
+
 killable@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npm.taobao.org/killable/download/killable-1.0.1.tgz#4c8ce441187a061c7474fb87ca08e2a638194892"
@@ -8151,6 +8156,11 @@ prepend-http@^1.0.0:
   resolved "https://registry.npm.taobao.org/prepend-http/download/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
   integrity sha1-1PRWKwzjaW5BrFLQ4ALlemNdxtw=
 
+prettier@^1.18.2:
+  version "1.18.2"
+  resolved "https://registry.npm.taobao.org/prettier/download/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
+  integrity sha1-aCPnxZAAF7S9Os9G/prEtNe9qeo=
+
 pretty-bytes@^5.1.0:
   version "5.3.0"
   resolved "https://registry.npm.taobao.org/pretty-bytes/download/pretty-bytes-5.3.0.tgz#f2849e27db79fb4d6cfe24764fc4134f165989f2"
@@ -8474,6 +8484,13 @@ react-medium-image-zoom@^3.0.16:
   resolved "https://registry.npm.taobao.org/react-medium-image-zoom/download/react-medium-image-zoom-3.1.1.tgz#6e48901e5e899fad4483e9a7251ad9a8e81ded23"
   integrity sha1-bkiQHl6Jn61Eg+mnJRrZqOgd7SM=
 
+react-popup@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.npm.taobao.org/react-popup/download/react-popup-0.10.0.tgz#8e8a7cd9a8b46d8f981c0216756e32ff2cacf2ac"
+  integrity sha1-jop82ai0bY+YHAIWdW4y/yys8qw=
+  dependencies:
+    keymaster "^1.6.2"
+
 react-portal@^4.1.4:
   version "4.2.0"
   resolved "https://registry.npm.taobao.org/react-portal/download/react-portal-4.2.0.tgz#5400831cdb0ae64dccb8128121cf076089ab1afd"
@@ -8550,6 +8567,11 @@ react@^16.8.6, react@^16.9.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
+
+reactjs-popup@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.npm.taobao.org/reactjs-popup/download/reactjs-popup-1.4.2.tgz#7ef29df2d87e31ffb0a9c6aae909cbd65d786be7"
+  integrity sha1-fvKd8th+Mf+wqcaq6QnL1l14a+c=
 
 read-pkg-up@^2.0.0:
   version "2.0.0"

@@ -1,0 +1,14 @@
+.bm-toolbar {
+  padding: 5px 0;
+  box-shadow: rgb(170, 170, 170) 0 0 2px;
+}
+
+.bm-toolbar-item {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.bm-toolbar-item:hover {
+  color: rgb(44, 184, 146);
+}

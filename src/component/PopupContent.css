@@ -1,0 +1,11 @@
+.popup-content-list {
+    padding: 0;
+    list-style: none;
+}
+.popup-content-list-item {
+    padding: 5px 0 5px 5px;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid #dddddd;
+    line-height: 30px;
+    cursor: pointer;
+}
