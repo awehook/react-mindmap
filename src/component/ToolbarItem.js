@@ -1,7 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import cx from "classnames";
-import { DiagramState, exportMindMapModelToJSON } from "blink-mind-react";
 
 export class ToolbarItem extends React.Component {
   constructor(props) {
@@ -9,11 +7,11 @@ export class ToolbarItem extends React.Component {
   }
   onClick = () => {
     console.log("toolbar item click");
-    let {config,diagramState,onChange} = this.props;
+    let { config, diagramState, onChange } = this.props;
     if (config.opType) {
       this.props.op(config.opType, null);
-    } else if(config.clickHandler) {
-      config.clickHandler(diagramState,onChange);
+    } else if (config.clickHandler) {
+      config.clickHandler(diagramState, onChange);
     }
   };
 
@@ -23,7 +21,7 @@ export class ToolbarItem extends React.Component {
       <span
         className={cx("bm-toolbar-item", "iconfont", `bm-${config.icon}`)}
         onClick={this.onClick}
-      ></span>
+      />
     );
   }
 }

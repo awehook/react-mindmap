@@ -13,29 +13,24 @@ export class Toolbar extends React.Component {
   }
 
   showPopupExport = diagramState => {
-    console.log("showPopupExport");
-    Popup.registerPlugin("popupExport", function() {
-      this.create({
-        title: "Please select export file format",
-        content: <PopupExportContent diagramState={diagramState} />
-      });
-    });
-    Popup.plugins().popupExport();
+    Popup.create(
+        {
+          title: "Please select export file format",
+          content: <PopupExportContent diagramState={diagramState} />
+        }
+    );
   };
 
   showPopupOpenFile = (diagramState, onChange) => {
-    Popup.registerPlugin("popupOpenFile", function() {
-      this.create({
-        title: "Open File",
-        content: (
+    Popup.create({
+      title: "Open File",
+      content: (
           <PopupOpenFileContent
-            diagramState={diagramState}
-            onChange={onChange}
+              diagramState={diagramState}
+              onChange={onChange}
           />
-        )
-      });
+      )
     });
-    Popup.plugins().popupOpenFile();
   };
 
   items = [
@@ -81,29 +76,20 @@ export class Toolbar extends React.Component {
     }
   ];
 
-  op = (opType, nodeKey, arg) => {
-    let { diagramState, onChange } = this.props;
-    let newState = DiagramState.op(diagramState, opType, nodeKey, arg);
-    onChange(newState);
-  };
-
   render() {
-    let { diagramState, onChange } = this.props;
+    let { diagramState, onChange,op } = this.props;
     let toolbarItems = this.items.map(item => (
       <ToolbarItem
         config={item}
         key={item.label}
         diagramState={diagramState}
         onChange={onChange}
-        op={this.op}
+        op={op}
       />
     ));
     return (
       <div>
         <div className="bm-toolbar">{toolbarItems}</div>
-        {/*{*/}
-        {/*this.state.popupType==='Export' ? <PopupExport/> : null*/}
-        {/*}*/}
       </div>
     );
   }

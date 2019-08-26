@@ -1,9 +1,12 @@
 import React from "react";
+import Keys from "fbjs/lib/Keys";
 import {
   DiagramWidget,
   MindMapModel,
   DiagramConfig,
-  DiagramState
+  DiagramState,
+  OpType,
+  FocusItemMode
 } from "blink-mind-react";
 
 import { Toolbar } from "./Toolbar";
@@ -40,10 +43,68 @@ export class MindMap extends React.Component {
     };
   }
 
+  getFocusItemMode() {
+    return this.state.diagramState.mindMapModel.getFocusItemMode();
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.onKeyDown);
+    document.addEventListener("keyup", this.onKeyUp);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.onKeyDown);
+    document.removeEventListener("keyup", this.onKeyUp);
+  }
+
   onChange = diagramState => {
-    console.log('onChange');
+    console.log("onChange");
     console.log(diagramState.mindMapModel);
     this.setState({ diagramState });
+  };
+
+  onKeyDown = e => {
+    let focusItemMode = this.getFocusItemMode();
+    if (
+      focusItemMode === FocusItemMode.Normal ||
+      focusItemMode === FocusItemMode.PopupMenu
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  onKeyUp = e => {
+    console.log(e);
+    let focusItemMode = this.getFocusItemMode();
+    switch (e.which) {
+      case Keys.TAB:
+        if (
+          focusItemMode === FocusItemMode.Normal ||
+          focusItemMode === FocusItemMode.PopupMenu
+        ) {
+          this.op(OpType.ADD_CHILD);
+        }
+        break;
+      case Keys.RETURN:
+        if (
+          focusItemMode === FocusItemMode.Normal ||
+          focusItemMode === FocusItemMode.PopupMenu
+        ) {
+          this.op(OpType.ADD_SIBLING);
+        }
+        if (focusItemMode === FocusItemMode.Editing) {
+          if (e.ctrlKey) {
+            this.op(OpType.ADD_SIBLING);
+          }
+        }
+        break;
+    }
+  };
+
+  op = (opType, nodeKey, arg) => {
+    let { diagramState } = this.state;
+    let newState = DiagramState.op(diagramState, opType, nodeKey, arg);
+    this.onChange(newState);
   };
 
   render() {
@@ -52,6 +113,7 @@ export class MindMap extends React.Component {
         <Toolbar
           diagramState={this.state.diagramState}
           onChange={this.onChange}
+          op={this.op}
         />
         <DiagramWidget
           diagramState={this.state.diagramState}
