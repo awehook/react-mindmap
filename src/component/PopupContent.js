@@ -51,15 +51,15 @@ export function PopupOpenFileContent(props) {
   return (
     <div className='popup-content'>
       <div>
-        支持打开以下格式的文件
+        Support for opening files in the following format
       </div>
       <ul className='popup-content-list'>
         <li className='popup-content-list-item' >JSON (.json)</li>
       </ul>
 
       <div>
-        <button onClick={openFile}>打开文件</button>
-        <button>取消</button>
+        <button onClick={openFile}>Open File</button>
+        <button>Cancel</button>
       </div>
     </div>
   )

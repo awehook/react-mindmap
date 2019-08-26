@@ -16,7 +16,7 @@ export class Toolbar extends React.Component {
     console.log("showPopupExport");
     Popup.registerPlugin("popupExport", function() {
       this.create({
-        title: "请选择导出格式",
+        title: "Please select export file format",
         content: <PopupExportContent diagramState={diagramState} />
       });
     });
@@ -26,7 +26,7 @@ export class Toolbar extends React.Component {
   showPopupOpenFile = (diagramState, onChange) => {
     Popup.registerPlugin("popupOpenFile", function() {
       this.create({
-        title: "打开文件",
+        title: "Open File",
         content: (
           <PopupOpenFileContent
             diagramState={diagramState}

@@ -1,7 +1,6 @@
 import React from "react";
 import {
   DiagramWidget,
-  MindDiagramModel,
   MindMapModel,
   DiagramConfig,
   DiagramState
