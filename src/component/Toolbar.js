@@ -1,34 +1,38 @@
 import React from "react";
-import { ToolbarItem, ToolbarItemConfig } from "./ToolbarItem";
+import { ToolbarItem } from "./ToolbarItem";
 import "./Toolbar.css";
-import { OpType, DiagramState } from "blink-mind-react";
+import { OpType } from "blink-mind-react";
 
-import { PopupExportContent, PopupOpenFileContent } from "./PopupContent";
+import {
+  PopupChangeTheme,
+  PopupExportContent,
+  PopupOpenFileContent
+} from "./PopupContent";
 
 import Popup from "react-popup";
 
 export class Toolbar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   showPopupExport = diagramState => {
-    Popup.create(
-        {
-          title: "Please select export file format",
-          content: <PopupExportContent diagramState={diagramState} />
-        }
-    );
+    Popup.create({
+      title: "Please select export file format",
+      content: <PopupExportContent diagramState={diagramState} />
+    });
   };
 
   showPopupOpenFile = (diagramState, onChange) => {
     Popup.create({
       title: "Open File",
       content: (
-          <PopupOpenFileContent
-              diagramState={diagramState}
-              onChange={onChange}
-          />
+        <PopupOpenFileContent diagramState={diagramState} onChange={onChange} />
+      )
+    });
+  };
+
+  showPopupChangeTheme = (diagramState, onChange) => {
+    Popup.create({
+      title: "Change Theme",
+      content: (
+        <PopupChangeTheme diagramState={diagramState} onChange={onChange} />
       )
     });
   };
@@ -48,6 +52,11 @@ export class Toolbar extends React.Component {
       icon: "export",
       label: "export file",
       clickHandler: this.showPopupExport
+    },
+    {
+      icon: "theme",
+      label: "change theme",
+      clickHandler: this.showPopupChangeTheme
     },
     {
       icon: "undo",
@@ -77,7 +86,7 @@ export class Toolbar extends React.Component {
   ];
 
   render() {
-    let { diagramState, onChange,op } = this.props;
+    let { diagramState, onChange, op } = this.props;
     let toolbarItems = this.items.map(item => (
       <ToolbarItem
         config={item}

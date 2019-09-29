@@ -3,7 +3,6 @@ import Keys from "fbjs/lib/Keys";
 import {
   DiagramWidget,
   MindMapModel,
-  DiagramConfig,
   DiagramState,
   OpType,
   FocusItemMode
@@ -58,8 +57,8 @@ export class MindMap extends React.Component {
   }
 
   onChange = diagramState => {
-    console.log("onChange");
-    console.log(diagramState.mindMapModel);
+    // console.log("onChange");
+    // console.log(diagramState.mindMapModel);
     this.setState({ diagramState });
   };
 
@@ -97,6 +96,8 @@ export class MindMap extends React.Component {
             this.op(OpType.ADD_SIBLING);
           }
         }
+        break;
+      default:
         break;
     }
   };

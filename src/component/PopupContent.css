@@ -9,3 +9,17 @@
     line-height: 30px;
     cursor: pointer;
 }
+
+.theme-color {
+    width: 40px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.popup-btn {
+    margin-right: 20px;
+}
+
+.popup-btn:hover {
+    background-color: rgb(44, 184, 146);
+}

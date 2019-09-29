@@ -1,10 +1,10 @@
 {
   "name": "react-mindmap",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "MIT",
   "homepage": "https://awehook.github.io/react-mindmap/",
   "dependencies": {
-    "blink-mind-react": "^0.1.7",
+    "blink-mind-react": "0.1.8-beta.1",
     "fbjs": "^1.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",

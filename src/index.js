@@ -4,6 +4,18 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import Popup from "react-popup";
+
+let debugNameSpaces = [
+  "node:*",
+  "model:*",
+  "render:*"
+  // "-node:LinkWidget"
+];
+
+localStorage.debug =
+  null;
+  //debugNameSpaces.join(',');
+
 ReactDOM.render(<App />, document.getElementById("root"));
 ReactDOM.render(<Popup />, document.getElementById("popup"));
 
