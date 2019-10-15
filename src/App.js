@@ -4,11 +4,7 @@ import "./App.css";
 import "./popup.css";
 
 function App() {
-  return (
-    <>
-      <MindMap />
-    </>
-  );
+  return <MindMap />;
 }
 
 export default App;
