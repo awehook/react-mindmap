@@ -38,11 +38,11 @@ export class Toolbar extends React.Component {
   };
 
   items = [
-    {
-      icon: "newfile",
-      label: "new file"
-      // opType: OpType.REDO
-    },
+    // {
+    //   icon: "newfile",
+    //   label: "new file"
+    //   // opType: OpType.REDO
+    // },
     {
       icon: "openfile",
       label: "open file",
