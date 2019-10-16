@@ -10,7 +10,7 @@ import Popup from "react-popup";
 
 export function PopupExportContent(props) {
   const exportJSON = () => {
-    let model = props.diagramState.mindMapModel;
+    let model = props.diagramState.getModel();
     const data = convertMindMapModelToRaw(model);
     let json = JSON.stringify(data);
     let url = `data:text/plain,${encodeURIComponent(json)}`;
@@ -39,13 +39,13 @@ export function PopupOpenFileContent(props) {
     input.addEventListener("change", evt => {
       const file = evt.target.files[0];
       const fr = new FileReader();
-      console.log('add fr onload');
+      console.log("add fr onload");
       fr.onload = evt => {
         const txt = evt.target.result;
         let obj = JSON.parse(txt);
         console.log(obj);
         let model = convertRawToMindMapModel(obj);
-        let newDiagramState = DiagramState.setMindMapModel(diagramState, model);
+        let newDiagramState = DiagramState.setModel(diagramState, model);
         onChange(newDiagramState);
       };
       fr.readAsText(file);
@@ -74,7 +74,7 @@ export function PopupOpenFileContent(props) {
 export function PopupChangeTheme(props) {
   const changeTheme = theme => {
     let { diagramState, onChange } = props;
-    let newConfig = { ...diagramState.config, theme: theme };
+    let newConfig = { ...diagramState.getConfig(), theme: theme };
     let newState = DiagramState.setConfig(diagramState, newConfig);
     onChange(newState);
   };
@@ -99,7 +99,7 @@ export function PopupChangeTheme(props) {
     return list;
   };
   let { diagramState } = props;
-  let themes = diagramState.config.themeConfigs;
+  let themes = diagramState.getConfig().themeConfigs;
   console.log(themes);
   return (
     <div className="popup-content">

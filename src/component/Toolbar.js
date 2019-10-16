@@ -1,15 +1,16 @@
 import React from "react";
 import { ToolbarItem } from "./ToolbarItem";
 import "./Toolbar.css";
-import { OpType } from "blink-mind-react";
-
+import { OpType, DiagramState } from "blink-mind-react";
 import {
   PopupChangeTheme,
   PopupExportContent,
   PopupOpenFileContent
 } from "./PopupContent";
-
 import Popup from "react-popup";
+import debug from "debug";
+
+const log = debug("app");
 
 export class Toolbar extends React.Component {
   showPopupExport = diagramState => {
@@ -37,11 +38,18 @@ export class Toolbar extends React.Component {
     });
   };
 
+  handleUndo = diagramState => {
+    this.props.onChange(DiagramState.undo(diagramState));
+  };
+
+  handleRedo = diagramState => {
+    this.props.onChange(DiagramState.redo(diagramState));
+  };
+
   items = [
     // {
     //   icon: "newfile",
     //   label: "new file"
-    //   // opType: OpType.REDO
     // },
     {
       icon: "openfile",
@@ -59,16 +67,6 @@ export class Toolbar extends React.Component {
       clickHandler: this.showPopupChangeTheme
     },
     {
-      icon: "undo",
-      label: "undo",
-      opType: OpType.UNDO
-    },
-    {
-      icon: "redo",
-      label: "redo",
-      opType: OpType.REDO
-    },
-    {
       icon: "add-sibling",
       label: "add sibling",
       opType: OpType.ADD_SIBLING
@@ -82,6 +80,16 @@ export class Toolbar extends React.Component {
       icon: "delete-node",
       label: "delete node",
       opType: OpType.DELETE_NODE
+    },
+    {
+      icon: "undo",
+      label: "undo",
+      clickHandler: this.handleUndo
+    },
+    {
+      icon: "redo",
+      label: "redo",
+      clickHandler: this.handleRedo
     }
   ];
 

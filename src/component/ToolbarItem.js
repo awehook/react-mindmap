@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
 
-export const ToolbarItem = ({diagramState, onChange,config,op})=>{
+export const ToolbarItem = ({ diagramState, onChange, config, op }) => {
   const onClick = () => {
     if (config.opType) {
       op(config.opType, null);

@@ -43,7 +43,7 @@ export class MindMap extends React.Component {
   }
 
   getFocusItemMode() {
-    return this.state.diagramState.mindMapModel.getFocusItemMode();
+    return this.state.diagramState.getModel().getFocusItemMode();
   }
 
   componentDidMount() {
@@ -57,8 +57,6 @@ export class MindMap extends React.Component {
   }
 
   onChange = diagramState => {
-    // console.log("onChange");
-    // console.log(diagramState.mindMapModel);
     this.setState({ diagramState });
   };
 
