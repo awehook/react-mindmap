@@ -4,7 +4,9 @@
   "license": "MIT",
   "homepage": "https://awehook.github.io/react-mindmap/",
   "dependencies": {
-    "blink-mind-react": "0.1.8-beta.5",
+    "@blink-mind/core": "0.0.1",
+    "@blink-mind/renderer-react": "0.0.1",
+    "@blink-mind/rich-text-editor-plugin": "0.0.1",
     "fbjs": "^1.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",

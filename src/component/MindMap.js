@@ -1,123 +1,97 @@
 import React from "react";
-import Keys from "fbjs/lib/Keys";
-import {
-  DiagramWidget,
-  MindMapModel,
-  DiagramState,
-  OpType,
-  FocusItemMode
-} from "blink-mind-react";
 
 import { Toolbar } from "./Toolbar";
+
+import { Model } from '@blink-mind/core';
+import { Diagram } from '@blink-mind/renderer-react';
+import richTextEditorPlugin from '@blink-mind/plugin-rich-text-editor';
+import '@blink-mind/renderer-react/lib/main.css'
+
+const plugins = [richTextEditorPlugin()];
+function generateSimpleModel() {
+  return Model.create({
+    rootTopicKey: 'root',
+    topics: [
+      { key: 'root', content: 'MainTopic', subKeys: ['sub1', 'sub2'] },
+      {
+        key: 'sub1',
+        parentKey: 'root',
+        content: 'SubTopic1',
+        subKeys: ['sub1_1', 'sub1_2'],
+        collapse: false
+      },
+      {
+        key: 'sub1_1',
+        parentKey: 'sub1',
+        content: 'SubTopic',
+        collapse: false
+      },
+      {
+        key: 'sub1_2',
+        parentKey: 'sub1',
+        content: 'SubTopic',
+        collapse: false
+      },
+      {
+        key: 'sub2',
+        subKeys: ['sub2_1', 'sub2_2'],
+        parentKey: 'root',
+        content: 'SubTopic2'
+      },
+      {
+        key: 'sub2_1',
+        parentKey: 'sub2',
+        content: 'SubTopic',
+        collapse: false
+      },
+      {
+        key: 'sub2_2',
+        parentKey: 'sub2',
+        content: 'SubTopic',
+        collapse: false
+      }
+    ]
+  });
+}
 
 export class MindMap extends React.Component {
   constructor(props) {
     super(props);
-    let mindModel = MindMapModel.createWith({
-      rootItemKey: "root",
-      editorRootItemKey: "root",
-      items: [
-        { key: "root", content: "MainTopic", subItemKeys: ["sub1", "sub2"] },
-        {
-          key: "sub1",
-          parentKey: "root",
-          content: "SubTopic",
-          subItemKeys: [],
-          collapse: true
-        },
-        {
-          key: "sub2",
-          parentKey: "root",
-          content: "SubTopic",
-          subItemKeys: []
-        }
-      ]
-    });
-    let diagramConfig = {
-      hMargin: 10
-    };
-    let diagramState = DiagramState.createWith(mindModel, diagramConfig);
+    this.initModel()
+  }
+
+  initModel() {
+    const model = generateSimpleModel();
     this.state = {
-      diagramState: diagramState
+      model
     };
   }
 
-  getFocusItemMode() {
-    return this.state.diagramState.getModel().getFocusItemMode();
+  renderDiagram() {
+    return (
+      <Diagram
+        model={this.state.model}
+        onChange={this.onChange}
+        plugins={plugins}
+      />
+    );
   }
 
-  componentDidMount() {
-    document.addEventListener("keydown", this.onKeyDown);
-    document.addEventListener("keyup", this.onKeyUp);
-  }
 
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.onKeyDown);
-    document.removeEventListener("keyup", this.onKeyUp);
-  }
-
-  onChange = diagramState => {
-    this.setState({ diagramState });
+  onChange = (model) => {
+    this.setState({
+      model
+    });
   };
 
-  onKeyDown = e => {
-    let focusItemMode = this.getFocusItemMode();
-    if (
-      focusItemMode === FocusItemMode.Normal ||
-      focusItemMode === FocusItemMode.PopupMenu
-    ) {
-      e.preventDefault();
-    }
-  };
 
-  onKeyUp = e => {
-    console.log(e);
-    let focusItemMode = this.getFocusItemMode();
-    switch (e.which) {
-      case Keys.TAB:
-        if (
-          focusItemMode === FocusItemMode.Normal ||
-          focusItemMode === FocusItemMode.PopupMenu
-        ) {
-          this.op(OpType.ADD_CHILD);
-        }
-        break;
-      case Keys.RETURN:
-        if (
-          focusItemMode === FocusItemMode.Normal ||
-          focusItemMode === FocusItemMode.PopupMenu
-        ) {
-          this.op(OpType.ADD_SIBLING);
-        }
-        if (focusItemMode === FocusItemMode.Editing) {
-          if (e.ctrlKey) {
-            this.op(OpType.ADD_SIBLING);
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  };
 
-  op = (opType, nodeKey, arg) => {
-    let { diagramState } = this.state;
-    let newState = DiagramState.op(diagramState, opType, nodeKey, arg);
-    this.onChange(newState);
-  };
+
 
   render() {
     return (
       <div className="mindmap">
-        <Toolbar
-          diagramState={this.state.diagramState}
-          onChange={this.onChange}
-          op={this.op}
-        />
-        <DiagramWidget
-          diagramState={this.state.diagramState}
-          onChange={this.onChange}
-        />
+        {this.renderDiagram()}
       </div>
     );
   }
