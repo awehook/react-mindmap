@@ -1,56 +1,13 @@
 import React from "react";
 import { ToolbarItem } from "./ToolbarItem";
+import { Popover, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import "./Toolbar.css";
-import { OpType, DiagramState } from "blink-mind-react";
-import {
-  PopupChangeTheme,
-  PopupExportContent,
-  PopupOpenFileContent
-} from "./PopupContent";
-import Popup from "react-popup";
+import { iconClassName } from "@blink-mind/renderer-react";
 import debug from "debug";
-
 const log = debug("app");
 
 export class Toolbar extends React.Component {
-  showPopupExport = diagramState => {
-    Popup.create({
-      title: "Please select export file format",
-      content: <PopupExportContent diagramState={diagramState} />
-    });
-  };
-
-  showPopupOpenFile = (diagramState, onChange) => {
-    Popup.create({
-      title: "Open File",
-      content: (
-        <PopupOpenFileContent diagramState={diagramState} onChange={onChange} />
-      )
-    });
-  };
-
-  showPopupChangeTheme = (diagramState, onChange) => {
-    Popup.create({
-      title: "Change Theme",
-      content: (
-        <PopupChangeTheme diagramState={diagramState} onChange={onChange} />
-      )
-    });
-  };
-
-  handleUndo = diagramState => {
-    this.props.onChange(DiagramState.undo(diagramState));
-  };
-
-  handleRedo = diagramState => {
-    this.props.onChange(DiagramState.redo(diagramState));
-  };
-
   items = [
-    // {
-    //   icon: "newfile",
-    //   label: "new file"
-    // },
     {
       icon: "openfile",
       label: "open file",
@@ -67,21 +24,6 @@ export class Toolbar extends React.Component {
       clickHandler: this.showPopupChangeTheme
     },
     {
-      icon: "add-sibling",
-      label: "add sibling",
-      opType: OpType.ADD_SIBLING
-    },
-    {
-      icon: "add-child",
-      label: "add child",
-      opType: OpType.ADD_CHILD
-    },
-    {
-      icon: "delete-node",
-      label: "delete node",
-      opType: OpType.DELETE_NODE
-    },
-    {
       icon: "undo",
       label: "undo",
       clickHandler: this.handleUndo
@@ -94,19 +36,22 @@ export class Toolbar extends React.Component {
   ];
 
   render() {
-    let { diagramState, onChange, op } = this.props;
-    let toolbarItems = this.items.map(item => (
-      <ToolbarItem
-        config={item}
-        key={item.label}
-        diagramState={diagramState}
-        onChange={onChange}
-        op={op}
-      />
-    ));
+    const { onClickExportJson, onClickOpenFile } = this.props;
     return (
       <div>
-        <div className="bm-toolbar">{toolbarItems}</div>
+        <div
+          className={`bm-toolbar-item ${iconClassName("openfile")}`}
+          onClick={onClickOpenFile}
+        />
+        <div className="bm-toolbar-item">
+          <Popover enforceFocus={false}>
+            <div className={iconClassName("export")} />
+            <Menu>
+              <MenuItem text="JSON(.json)" onClick={onClickExportJson} />
+              <MenuDivider />
+            </Menu>
+          </Popover>
+        </div>
       </div>
     );
   }

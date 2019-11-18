@@ -7,6 +7,7 @@
   padding: 10px;
   cursor: pointer;
   font-size: 24px;
+  display: inline-block;
 }
 
 .bm-toolbar-item:hover {
