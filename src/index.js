@@ -5,7 +5,7 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 let debugNameSpaces = [
-  "app",
+  "app"
   // "node:*",
 ];
 

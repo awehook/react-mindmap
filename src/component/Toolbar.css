@@ -1,15 +1,52 @@
 .bm-toolbar {
-  padding: 5px 0;
+  /*padding: 5px 0;*/
   box-shadow: rgb(170, 170, 170) 0 0 2px;
 }
 
 .bm-toolbar-item {
-  padding: 10px;
+  position: relative;
+  padding: 6px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   font-size: 24px;
   display: inline-block;
 }
 
+.bm-toolbar-item-disabled {
+  color: grey;
+}
+.bm-toolbar-item-disabled:hover {
+  color: grey !important;
+}
+
 .bm-toolbar-item:hover {
   color: rgb(44, 184, 146);
+}
+
+.bm-theme-item {
+  cursor: pointer;
+  padding: 10px;
+}
+
+.bm-toolbar .iconfont {
+  font-size: 28px !important;
+}
+
+.bm-theme-img {
+  width: 500px;
+  height: 125px;
+  border: #333333 1px solid;
+}
+
+.bm-theme-img:hover {
+  border: rgb(44, 184, 146) 2px solid;
+}
+
+.bm-toolbar-popover-target {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
 }

@@ -3,13 +3,18 @@ import { Model } from "@blink-mind/core";
 import { Diagram } from "@blink-mind/renderer-react";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
+import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import { Toolbar } from "./Toolbar";
 import { downloadFile, generateSimpleModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
 const log = debug("app");
 
-const plugins = [RichTextEditorPlugin(), JsonSerializerPlugin()];
+const plugins = [
+  RichTextEditorPlugin(),
+  JsonSerializerPlugin(),
+  ThemeSelectorPlugin()
+];
 
 export class MindMap extends React.Component {
   constructor(props) {
@@ -20,6 +25,9 @@ export class MindMap extends React.Component {
   diagram;
   diagramRef = ref => {
     this.diagram = ref;
+    this.setState({
+
+    })
   };
 
   initModel() {
@@ -64,6 +72,24 @@ export class MindMap extends React.Component {
     this.setState({ showDialog: false });
   };
 
+  onClickChangeTheme = themeKey => e => {
+    const props = this.diagram.getDiagramProps();
+    const { controller } = props;
+    controller.run("selectTheme", { ...props, themeKey });
+  };
+
+  onClickUndo = e => {
+    const props = this.diagram.getDiagramProps();
+    const { controller } = props;
+    controller.run('undo',props);
+  };
+
+  onClickRedo = e => {
+    const props = this.diagram.getDiagramProps();
+    const { controller } = props;
+    controller.run('redo',props);
+  };
+
   renderDiagram() {
     return (
       <Diagram
@@ -76,11 +102,20 @@ export class MindMap extends React.Component {
   }
 
   renderToolbar() {
-    const eventHandlers = {
+    const props = this.diagram.getDiagramProps();
+    const { controller } = props;
+    const canUndo = controller.run('canUndo',props);
+    const canRedo = controller.run('canRedo',props);
+    const toolbarProps = {
       onClickExportJson: this.onClickExportJson,
-      onClickOpenFile: this.onClickOpenFile
+      onClickOpenFile: this.onClickOpenFile,
+      onClickChangeTheme: this.onClickChangeTheme,
+      onClickUndo: this.onClickUndo,
+      onClickRedo: this.onClickRedo,
+      canUndo,
+      canRedo
     };
-    return <Toolbar {...eventHandlers} />;
+    return <Toolbar {...toolbarProps} />;
   }
 
   renderDialog() {}
@@ -94,7 +129,7 @@ export class MindMap extends React.Component {
   render() {
     return (
       <div className="mindmap">
-        {this.renderToolbar()}
+        {this.diagram && this.renderToolbar()}
         {this.renderDiagram()}
       </div>
     );
