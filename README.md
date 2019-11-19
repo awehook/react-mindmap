@@ -1,8 +1,17 @@
-This is a web mindmap app using [blink-mind-react](https://github.com/awehook/blink-mind-react) library.
+This is a web mindmap app using [blink-mind](https://github.com/awehook/blink-mind) library.
 
 ### Online Demo
 
 [Demo](https://awehook.github.io/react-mindmap/)
+
+
+### Features
+
+1. Markdown editor for topic and topic notes.
+2. HotKey support.
+3. Reorganize the diagram by drag and drop.
+4. Multiple theme. 
+5. Style customization.
 
 ### How to run
 ```
@@ -11,12 +20,5 @@ yarn start
 ```
 
 Then open [localhost:3000](http://localhost:3000)
-
-
-![image](./screenshots/openfile.jpg)
-
-Click the open toolbar menu then select the file you want to open.
-
-All the sample mind map are in the directory /example-mindmap .
 
 ![image](./screenshots/example-mindmap.jpg)
