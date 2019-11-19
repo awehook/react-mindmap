@@ -52,6 +52,16 @@ export class Toolbar extends React.Component {
             </Menu>
           </Popover>
         </div>
+
+        <div className="bm-toolbar-item">
+          <Popover enforceFocus={false}>
+            <div className={iconClassName("theme")} />
+            <Menu>
+              <MenuItem text="JSON(.json)" onClick={onClickExportJson} />
+              <MenuDivider />
+            </Menu>
+          </Popover>
+        </div>
       </div>
     );
   }
