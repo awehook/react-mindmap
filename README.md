@@ -12,9 +12,6 @@ yarn start
 
 Then open [localhost:3000](http://localhost:3000)
 
-I have created a sample mind map in /example-mindmap .
-
-You can open it.
 
 ![image](./screenshots/openfile.jpg)
 
