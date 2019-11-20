@@ -1,5 +1,4 @@
 import React from "react";
-import { Model } from "@blink-mind/core";
 import { Diagram } from "@blink-mind/renderer-react";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
@@ -25,16 +24,12 @@ export class MindMap extends React.Component {
   diagram;
   diagramRef = ref => {
     this.diagram = ref;
-    this.setState({
-
-    })
+    this.setState({});
   };
 
   initModel() {
     const model = generateSimpleModel();
-    this.state = {
-      model
-    };
+    this.state = { model };
   }
 
   onClickOpenFile = e => {
@@ -72,22 +67,28 @@ export class MindMap extends React.Component {
     this.setState({ showDialog: false });
   };
 
-  onClickChangeTheme = themeKey => e => {
+  onClickSetTheme = themeKey => e => {
     const props = this.diagram.getDiagramProps();
     const { controller } = props;
-    controller.run("selectTheme", { ...props, themeKey });
+    controller.run("setTheme", { ...props, themeKey });
+  };
+
+  onClickSetLayout = layoutDir => e => {
+    const props = this.diagram.getDiagramProps();
+    const { controller } = props;
+    controller.run("setLayoutDir", { ...props, layoutDir });
   };
 
   onClickUndo = e => {
     const props = this.diagram.getDiagramProps();
     const { controller } = props;
-    controller.run('undo',props);
+    controller.run("undo", props);
   };
 
   onClickRedo = e => {
     const props = this.diagram.getDiagramProps();
     const { controller } = props;
-    controller.run('redo',props);
+    controller.run("redo", props);
   };
 
   renderDiagram() {
@@ -104,12 +105,13 @@ export class MindMap extends React.Component {
   renderToolbar() {
     const props = this.diagram.getDiagramProps();
     const { controller } = props;
-    const canUndo = controller.run('canUndo',props);
-    const canRedo = controller.run('canRedo',props);
+    const canUndo = controller.run("canUndo", props);
+    const canRedo = controller.run("canRedo", props);
     const toolbarProps = {
       onClickExportJson: this.onClickExportJson,
       onClickOpenFile: this.onClickOpenFile,
-      onClickChangeTheme: this.onClickChangeTheme,
+      onClickChangeTheme: this.onClickSetTheme,
+      onClickSetLayout: this.onClickSetLayout,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
