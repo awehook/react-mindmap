@@ -3,7 +3,7 @@ import { Diagram } from "@blink-mind/renderer-react";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
-import { Toolbar } from "./Toolbar";
+import { Toolbar } from "./toolbar/toolbar";
 import { downloadFile, generateSimpleModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
@@ -15,7 +15,7 @@ const plugins = [
   ThemeSelectorPlugin()
 ];
 
-export class MindMap extends React.Component {
+export class Mindmap extends React.Component {
   constructor(props) {
     super(props);
     this.initModel();
@@ -56,28 +56,6 @@ export class MindMap extends React.Component {
     input.click();
   };
 
-  onClickExportJson = e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-
-    const json = controller.run("serializeModel", props);
-    const jsonStr = JSON.stringify(json);
-    const url = `data:text/plain,${encodeURIComponent(jsonStr)}`;
-    downloadFile(url, "example.json");
-    this.setState({ showDialog: false });
-  };
-
-  onClickSetTheme = themeKey => e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("setTheme", { ...props, themeKey });
-  };
-
-  onClickSetLayout = layoutDir => e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("setLayoutDir", { ...props, layoutDir });
-  };
 
   onClickUndo = e => {
     const props = this.diagram.getDiagramProps();
@@ -108,14 +86,12 @@ export class MindMap extends React.Component {
     const canUndo = controller.run("canUndo", props);
     const canRedo = controller.run("canRedo", props);
     const toolbarProps = {
-      onClickExportJson: this.onClickExportJson,
       onClickOpenFile: this.onClickOpenFile,
-      onClickChangeTheme: this.onClickSetTheme,
-      onClickSetLayout: this.onClickSetLayout,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
-      canRedo
+      canRedo,
+      ...props
     };
     return <Toolbar {...toolbarProps} />;
   }
@@ -138,4 +114,4 @@ export class MindMap extends React.Component {
   }
 }
 
-export default MindMap;
+export default Mindmap;

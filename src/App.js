@@ -1,9 +1,9 @@
 import React from "react";
-import MindMap from "./component/MindMap";
+import Mindmap from "./component/mindmap";
 import "./App.css";
 
 function App() {
-  return <MindMap />;
+  return <Mindmap />;
 }
 
 export default App;
