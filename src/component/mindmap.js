@@ -4,7 +4,7 @@ import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import { Toolbar } from "./toolbar/toolbar";
-import { downloadFile, generateSimpleModel } from "../utils";
+import { generateSimpleModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
 const log = debug("app");
@@ -31,31 +31,6 @@ export class Mindmap extends React.Component {
     const model = generateSimpleModel();
     this.state = { model };
   }
-
-  onClickOpenFile = e => {
-    const input = document.createElement("input");
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    input.type = "file";
-    input.accept = ".json";
-    log("add onchange");
-    input.addEventListener("change", evt => {
-      const file = evt.target.files[0];
-      const fr = new FileReader();
-      log("add fr onload");
-      fr.onload = evt => {
-        const txt = evt.target.result;
-        let obj = JSON.parse(txt);
-        log("OpenFile:", obj);
-        let model = controller.run("deserializeModel", { controller, obj });
-        log("OpenFile:", model);
-        this.setState({ model });
-      };
-      fr.readAsText(file);
-    });
-    input.click();
-  };
-
 
   onClickUndo = e => {
     const props = this.diagram.getDiagramProps();
@@ -86,17 +61,14 @@ export class Mindmap extends React.Component {
     const canUndo = controller.run("canUndo", props);
     const canRedo = controller.run("canRedo", props);
     const toolbarProps = {
-      onClickOpenFile: this.onClickOpenFile,
+      diagram: this.diagram,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
       canRedo,
-      ...props
     };
     return <Toolbar {...toolbarProps} />;
   }
-
-  renderDialog() {}
 
   onChange = model => {
     this.setState({
