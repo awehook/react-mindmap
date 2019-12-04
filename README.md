@@ -4,6 +4,10 @@ This is a web mindmap app using [blink-mind](https://github.com/awehook/blink-mi
 
 [Demo](https://awehook.github.io/react-mindmap/)
 
+[Example mind map](https://github.com/awehook/mindmap) You can download example mind maps from the repository: https://github.com/awehook/mindmap and use this app open the mind map file.
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/webpack-mindmap.png)
+
 
 ### Features
 
@@ -22,3 +26,5 @@ yarn start
 Then open [localhost:3000](http://localhost:3000)
 
 ![image](./screenshots/example-mindmap.jpg)
+
+
