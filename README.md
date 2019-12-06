@@ -12,10 +12,22 @@ This is a web mindmap app using [blink-mind](https://github.com/awehook/blink-mi
 ### Features
 
 1. Markdown editor for topic and topic notes.
+
 2. HotKey support.
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/hotkey.png)
+
 3. Reorganize the diagram by drag and drop.
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/drag-and-drop.png)
+
 4. Multiple theme. 
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/blink-mind-theme.png)
+
 5. Style customization.
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/style-editor.png)
 
 ### How to run
 ```
