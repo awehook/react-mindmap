@@ -3,16 +3,19 @@ import { Diagram } from "@blink-mind/renderer-react";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
+import TopologyDiagramPlugin from "@blink-mind/plugin-topology-diagram";
 import { Toolbar } from "./toolbar/toolbar";
 import { generateSimpleModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
+
 const log = debug("app");
 
 const plugins = [
   RichTextEditorPlugin(),
   JsonSerializerPlugin(),
-  ThemeSelectorPlugin()
+  ThemeSelectorPlugin(),
+  TopologyDiagramPlugin()
 ];
 
 export class Mindmap extends React.Component {
