@@ -1,4 +1,4 @@
-This is a web mindmap app using [blink-mind](https://github.com/awehook/blink-mind) library.
+This is a online mindmap app using [blink-mind](https://github.com/awehook/blink-mind) library.
 
 ### Online Demo
 
@@ -11,21 +11,29 @@ This is a web mindmap app using [blink-mind](https://github.com/awehook/blink-mi
 
 ### Features
 
-1. Markdown editor for topic and topic notes.
+* Markdown editor for topic and topic notes.
 
-2. HotKey support.
+![image](https://github.com/awehook/images/raw/master/vscode-blink-mind/markdown-editor1.png)
+
+* flowchart can be attached to topic.
+
+![image](https://github.com/awehook/images/raw/master/vscode-blink-mind/context-menu-edit-topology.png)
+
+![image](https://github.com/awehook/images/raw/master/blink-mind/flowchart.png)
+
+* HotKey support.
 
 ![image](https://github.com/awehook/images/raw/master/blink-mind/hotkey.png)
 
-3. Reorganize the diagram by drag and drop.
+* Reorganize the diagram by drag and drop.
 
 ![image](https://github.com/awehook/images/raw/master/blink-mind/drag-and-drop.png)
 
-4. Multiple theme. 
+* Multiple theme. 
 
 ![image](https://github.com/awehook/images/raw/master/blink-mind/blink-mind-theme.png)
 
-5. Style customization.
+* Style customization.
 
 ![image](https://github.com/awehook/images/raw/master/blink-mind/style-editor.png)
 
