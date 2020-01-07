@@ -4,6 +4,7 @@ import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import TopologyDiagramPlugin from "@blink-mind/plugin-topology-diagram";
+import { TopicReferencePlugin, SearchPlugin } from "@blink-mind/plugins";
 import { Toolbar } from "./toolbar/toolbar";
 import { generateSimpleModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
@@ -13,9 +14,11 @@ const log = debug("app");
 
 const plugins = [
   RichTextEditorPlugin(),
-  JsonSerializerPlugin(),
   ThemeSelectorPlugin(),
-  TopologyDiagramPlugin()
+  TopicReferencePlugin(),
+  SearchPlugin(),
+  TopologyDiagramPlugin(),
+  JsonSerializerPlugin()
 ];
 
 export class Mindmap extends React.Component {
@@ -68,15 +71,18 @@ export class Mindmap extends React.Component {
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
-      canRedo,
+      canRedo
     };
     return <Toolbar {...toolbarProps} />;
   }
 
-  onChange = model => {
-    this.setState({
-      model
-    });
+  onChange = (model, callback) => {
+    this.setState(
+      {
+        model
+      },
+      callback
+    );
   };
 
   render() {

@@ -6,6 +6,7 @@ import { ToolbarItemOpen } from "./toolbar-item-open";
 import { ToolbarItemLayout } from "./toolbar-item-layout";
 import { ToolbarItemTheme } from "./toolbar-item-theme";
 import { ToolbarItemExport } from "./toolbar-item-export";
+import { ToolbarItemSearch } from "./toolbar-item-search";
 
 // import debug from "debug";
 // const log = debug("app");
@@ -22,6 +23,7 @@ export class Toolbar extends React.PureComponent {
         <ToolbarItemExport {...props} />
         <ToolbarItemTheme {...props} />
         <ToolbarItemLayout {...props} />
+        <ToolbarItemSearch {...props} />
 
         <div
           className={cx("bm-toolbar-item", iconClassName("undo"), {

@@ -319,7 +319,10 @@ module.exports = function(webpackEnv) {
       alias: {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-        "react-native": "react-native-web"
+        "react-native": "react-native-web",
+        // 为了解决yarn link lerna 的monorepo 导致webpack 打包进去多个react-dom的问题
+        react: path.resolve('node_modules/react'),
+        'react-dom': path.resolve('node_modules/react-dom')
       },
       plugins: [
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
