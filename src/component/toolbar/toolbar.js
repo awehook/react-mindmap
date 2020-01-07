@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
 import "./Toolbar.css";
-import { iconClassName, Icon } from "@blink-mind/renderer-react";
+import { iconClassName } from "@blink-mind/renderer-react";
 import { ToolbarItemOpen } from "./toolbar-item-open";
 import { ToolbarItemLayout } from "./toolbar-item-layout";
 import { ToolbarItemTheme } from "./toolbar-item-theme";
