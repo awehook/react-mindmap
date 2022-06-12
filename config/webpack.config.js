@@ -286,11 +286,11 @@ module.exports = function(webpackEnv) {
           blinkmind: {
             name: "chunk-blinkmind",
             priority: 22,
-            test: module => {
-              const isBlink = /@blink-mind/.test(module.context);
-              const isSrc = module.context.indexOf(path.resolve('src/')) !== -1;
-              return isBlink || isSrc ;
-            }
+            // test: module => {
+            //   const isBlink = /@blink-mind/.test(module.context);
+            //   const isSrc = module.context.indexOf(path.resolve('src/')) !== -1;
+            //   return isBlink || isSrc ;
+            // }
           }
         },
         name: false
