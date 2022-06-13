@@ -136,11 +136,12 @@ export function SearchPanel(props) {
       return notes.filter(note => !currentNotes.has(note.guid) )
   }
 
-  const getNoteById = ({ guid, title }) => () => {
+  const attachNote = ({ guid, title }) => () => {
     const topicKey = controller.currentModel.focusKey;
 
     controller.run('operation', {
       ...props,
+      model: controller.currentModel,
       topicKey: topicKey,
       opType: OpType.SET_TOPIC_BLOCK,
       blockType: BlockType.CONTENT,
@@ -167,7 +168,7 @@ export function SearchPanel(props) {
       : noteTitle;
     const titleProps = {
       key: guid,
-      onClick: getNoteById({ guid, title })
+      onClick: attachNote({ guid, title })
     };
     const titleEl = <TopicTitle {...titleProps}>{title}</TopicTitle>;
     const tip = (

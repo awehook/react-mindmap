@@ -176,6 +176,11 @@ function HotKeyPlugin() {
               { res }
           </>;
       },
+      getAllowUndo: (props, next) => {
+          const { model } = props;
+          const res = next();
+          return res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH;
+      },
       beforeOpFunction: (props) => {
           const { controller, opType, model, topicKey } = props;
           if (
