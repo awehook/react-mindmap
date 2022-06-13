@@ -82,6 +82,7 @@
 	},
 	"scripts": {
 		"start": "node scripts/start.js",
+		"backend": "python evernoteClient.py",
 		"build": "cross-env NODE_ENV=production node scripts/build.js",
 		"build-dev": "cross-env NODE_ENV=development node scripts/build.js",
 		"debug": "cross-env NODE_ENV=development node --inspect-brk scripts/build.js",

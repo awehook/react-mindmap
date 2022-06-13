@@ -1,3 +1,4 @@
+import { Map as ImmutableMap } from 'immutable';
 import { FocusMode, OpType, BlockType } from '@blink-mind/core';
 import * as React from 'react';
 import { Omnibar } from '@blueprintjs/select';
@@ -126,13 +127,9 @@ export function SearchPanel(props) {
     // });
     // return res;
 
-  const navigateToTopic = topicKey => e => {
-    controller.run('focusTopicAndMoveToCenter', { ...props, topicKey });
-  };
-
   const filterAlreadyExists = (notes) => {
-      const evernoteData = controller.currentModel.getIn(['extData', 'evernote'], {})
-      const currentNotes = new Set([...Object.keys(evernoteData).map(k => evernoteData[k].guid)])
+      const evernoteData = controller.currentModel.getIn(['extData', 'evernote'], new ImmutableMap())
+      const currentNotes = new Set([...evernoteData.values()].map(v => v.guid))
       return notes.filter(note => !currentNotes.has(note.guid) )
   }
 
@@ -160,7 +157,7 @@ export function SearchPanel(props) {
   }
 
   const renderItem = (note, props) => {
-    const { guid, title: noteTitle } = note;
+   const { guid, title: noteTitle } = note;
     const maxLength = 100;
     const needTip = noteTitle.length > maxLength;
     const title =  needTip
