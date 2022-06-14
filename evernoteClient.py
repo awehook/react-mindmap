@@ -1,11 +1,13 @@
+import os
 import flask
 from flask import Flask, request
 from evernote.api.client import EvernoteClient
 from evernote.edam.notestore import NoteStore
 
-developer_token = "<your_token>"
+evernote_token = os.environ.get('evernote_token', None)
+assert  evernote_token is not None, 'Please set token with "export evernote_token=<your_token>"'
 # Set up the NoteStore client
-client = EvernoteClient(token=developer_token, china=True ,sandbox=False)
+client = EvernoteClient(token=evernote_token, china=True ,sandbox=False)
 notestore = client.get_note_store()
 app = Flask(__name__)
 

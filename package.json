@@ -16,6 +16,7 @@
 		"classnames": "^2.2.6",
 		"cross-env": "^6.0.3",
 		"evernote": "^2.0.5",
+		"localforage": "^1.10.0",
 		"react": "^16.9.0",
 		"react-dom": "^16.9.0",
 		"styled-components": "^4.4.1"

@@ -33,3 +33,16 @@ export function generateSimpleModel() {
     ]
   });
 }
+
+export function throttled(fn, delay = 5000) {
+  let oldtime = null;
+  let newtime = null;
+  return function (...args) {
+      newtime = Date.now();
+      if (oldtime === null || newtime - oldtime >= delay) {
+          fn.apply(null, args)
+          oldtime = Date.now();
+          newtime = null;
+      }
+  }
+}

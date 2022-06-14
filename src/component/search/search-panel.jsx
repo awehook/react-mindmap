@@ -7,8 +7,8 @@ import {
   Popover,
 } from '@blueprintjs/core';
 import EvernoteClient from '../../evernote/client.js';
+import { memorize, throttled } from '../../utils/index.js';
 import './search-panel.css';
-import { memorize } from '../../utils/index.js';
 
 const evernoteCient = new EvernoteClient();
 const NavOmniBar = Omnibar;
@@ -89,19 +89,6 @@ const mergeNotes = (oldNotes, newNotes) => {
 }
 
 const offset = 500;
-
-function throttled(fn, delay = 5000) {
-  let oldtime = null;
-  let newtime = null;
-  return function (...args) {
-      newtime = Date.now();
-      if (oldtime === null || newtime - oldtime >= delay) {
-          fn.apply(null, args)
-          oldtime = Date.now();
-          newtime = null;
-      }
-  }
-}
 
 export function SearchPanel(props) {
   // const [cur, setCur] = React.useState(offset);

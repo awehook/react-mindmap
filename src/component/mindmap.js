@@ -3,13 +3,14 @@ import { Map as ImmutableMap } from "immutable";
 import { Diagram, Icon } from "@blink-mind/renderer-react";
 import { MenuItem } from "@blueprintjs/core";
 import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
+import localforage from 'localforage';
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import TopologyDiagramPlugin from "@blink-mind/plugin-topology-diagram";
 import { TopicReferencePlugin, SearchPlugin } from "@blink-mind/plugins";
 import { Toolbar } from "./toolbar/toolbar";
-import { generateSimpleModel } from "../utils";
+import { generateSimpleModel, throttled } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
 import { KeyboardHotKeyWidget } from './keyboardHotKeyWidget'
@@ -286,17 +287,46 @@ export class Mindmap extends React.Component {
     return <Toolbar {...toolbarProps} />;
   }
 
+  // autoSave per 60s
+  autoSaveModel = () => setInterval(() => {
+      if (this.state && this.state.model) {
+          localforage.setItem('react-mindmap-evernote-mind', this.state.model.toJS())
+          console.log(`Auto-Save at ${new Date()}`)
+      }
+    }, 60000)
+
+  componentDidMount() {
+      console.log('componentDidMount')
+      let model = null;
+      localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
+        if (err == null && value) {
+            const props = this.diagram.getDiagramProps();
+            const { controller } = props;
+            let obj = value;
+            if (obj && obj.extData && obj.extData.evernote) {
+                obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
+            }
+            model = controller.run("deserializeModel", { controller, obj });
+        }
+        if (model) { 
+            this.setState({ model }) 
+        };
+      })
+      this.autoSaveModel()
+  }
+
   // debug
   componentDidUpdate() {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    if (controller) {
-        // console.log((controller.run('getUndoRedoStack')))
-        console.log({ 
-            redo: (controller.run('getUndoRedoStack')).redoStack.size, 
-            undo: (controller.run('getUndoRedoStack')).undoStack.size
-      })
-    }
+      console.log('componentDidUpdate')
+      const props = this.diagram.getDiagramProps();
+      const { controller } = props;
+      if (controller) {
+          // console.log((controller.run('getUndoRedoStack')))
+          console.log({ 
+              redo: (controller.run('getUndoRedoStack')).redoStack.size, 
+              undo: (controller.run('getUndoRedoStack')).undoStack.size
+        })
+      }
   }
 
   onChange = (model, callback) => {
