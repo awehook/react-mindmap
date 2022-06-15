@@ -21,6 +21,9 @@
 		"react-dom": "^16.9.0",
 		"styled-components": "^4.4.1"
 	},
+	"server": {
+		"port": "4000"
+	},
 	"devDependencies": {
 		"@babel/core": "7.5.5",
 		"@svgr/webpack": "4.3.2",
@@ -82,7 +85,7 @@
 		"workbox-webpack-plugin": "4.3.1"
 	},
 	"scripts": {
-		"start": "node scripts/start.js",
+		"start": "export PORT=4444 && node scripts/start.js",
 		"backend": "python evernoteClient.py",
 		"build": "cross-env NODE_ENV=production node scripts/build.js",
 		"build-dev": "cross-env NODE_ENV=development node scripts/build.js",
