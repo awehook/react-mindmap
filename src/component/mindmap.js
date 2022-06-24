@@ -16,6 +16,7 @@ import debug from "debug";
 import { KeyboardHotKeyWidget } from './keyboardHotKeyWidget'
 import { mySearchPlugin } from "./search/search-plugin";
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, HOT_KEY_NAME_SEARCH } from './search/utils';
+import { MyTopicWidget } from "./MyTopicWidget/index"
 
 const log = debug("app");
 
@@ -175,6 +176,14 @@ function HotKeyPlugin() {
               { res }
           </>;
       },
+      renderTopicWidget(props, next) {
+          return <MyTopicWidget {...props} />
+      },
+      renderTopicBlocks(props, next) {
+        const res = next();
+        console.log({ props, res })
+        return res;
+      },
       getAllowUndo: (props, next) => {
           const { model } = props;
           const res = next();
@@ -290,7 +299,10 @@ export class Mindmap extends React.Component {
   // autoSave per 60s
   autoSaveModel = () => setInterval(() => {
       if (this.state && this.state.model) {
-          localforage.setItem('react-mindmap-evernote-mind', this.state.model.toJS())
+          const props = this.diagram.getDiagramProps();
+          const { controller } = props;
+          const serializedModel = controller.run('serializeModel', { controller, model: this.state.model });
+          localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
           console.log(`Auto-Save at ${new Date()}`)
       }
     }, 60000)
@@ -302,8 +314,8 @@ export class Mindmap extends React.Component {
         if (err == null && value) {
             const props = this.diagram.getDiagramProps();
             const { controller } = props;
-            let obj = value;
-            if (obj && obj.extData && obj.extData.evernote) {
+            let obj = JSON.parse(value);
+            if (obj && obj.extData && obj.extData.hasOwnProperty('evernote')) {
                 obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
             }
             model = controller.run("deserializeModel", { controller, obj });
@@ -348,4 +360,5 @@ export class Mindmap extends React.Component {
   }
 }
 
+Mindmap.whyDidYouRender = true;
 export default Mindmap;
