@@ -17,6 +17,8 @@
 		"classnames": "^2.2.6",
 		"cross-env": "^6.0.3",
 		"evernote": "^2.0.5",
+		"fuzzysort": "^2.0.1",
+		"html-react-parser": "^2.0.0",
 		"localforage": "^1.10.0",
 		"react": "^16.9.0",
 		"react-dom": "^16.9.0",
@@ -94,6 +96,7 @@
 		"test": "node scripts/test.js",
 		"predeploy": "yarn build",
 		"deploy": "gh-pages -d build",
+		"deploy-local": "./deploy-local.sh",
 		"up-blink": "node scripts/blink.js -u",
 		"link-blink": "node scripts/blink.js --link",
 		"unlink-blink": "node scripts/blink.js --unlink"

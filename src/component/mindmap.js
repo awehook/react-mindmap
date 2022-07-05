@@ -179,11 +179,6 @@ function HotKeyPlugin() {
       renderTopicWidget(props, next) {
           return <MyTopicWidget {...props} />
       },
-      renderTopicBlocks(props, next) {
-        const res = next();
-        console.log({ props, res })
-        return res;
-      },
       getAllowUndo: (props, next) => {
           const { model } = props;
           const res = next();

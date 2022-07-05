@@ -1,4 +1,5 @@
 import { Map as ImmutableMap } from 'immutable';
+import fuzzysort from 'fuzzysort';
 import { FocusMode, OpType, BlockType } from '@blink-mind/core';
 import * as React from 'react';
 import { Omnibar } from '@blueprintjs/select';
@@ -25,6 +26,9 @@ const TopicTitle = styled.div`
   width: 100%;
   font-size: 16px;
   cursor: pointer;
+  .highlight {
+    color: red;
+  };
   &:hover {
     background: #e3e8ec;
   }
@@ -44,6 +48,9 @@ const Tip = styled.div`
 
 const TipContent = styled.div`
   white-space: break-spaces;
+  .highlight {
+    color: red;
+  };
 `;
 
 const INPUT_PROPS = {
@@ -144,20 +151,21 @@ export function SearchPanel(props) {
   }
 
   const renderItem = (note, props) => {
-   const { guid, title: noteTitle } = note;
+   const { guid, highlighted: noteTitle } = note;
     const maxLength = 100;
-    const needTip = noteTitle.length > maxLength;
+    const needTip = note.title.length > maxLength;
     const title =  needTip
       ? noteTitle.substr(0, maxLength) + '...'
       : noteTitle;
     const titleProps = {
       key: guid,
-      onClick: attachNote({ guid, title })
+      onClick: attachNote({ guid, title: note.title }),
+      dangerouslySetInnerHTML: {__html: title}
     };
-    const titleEl = <TopicTitle {...titleProps}>{title}</TopicTitle>;
+    const titleEl = <TopicTitle {...titleProps}></TopicTitle>;
     const tip = (
       <Tip>
-        <TipContent>{noteTitle}</TipContent>
+        <TipContent dangerouslySetInnerHTML={ {__html: title} }></TipContent>
       </Tip>
     );
     const popoverProps = {
@@ -175,9 +183,12 @@ export function SearchPanel(props) {
     query,
     items
   ) => {
-    return items.filter(item =>
-        item.title.toLowerCase().includes(query.toLowerCase())
-      );
+     return fuzzysort.go(query.toLowerCase(), 
+              items,
+              {threshold: -10000, key: 'title'}).map(item => {
+                const {guid, title} = item['obj'];
+                return {guid, title, fuzzySearchResult: item, highlighted: fuzzysort.highlight(item, '<b class="highlight">')};
+              })
   };
 
   React.useEffect(
