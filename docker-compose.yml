@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  backend: 
+    build: backend
+    ports: 
+      - "5001:5001"
+    environment:
+      EVERNOTE_TOKEN: "${EVERNOTE_TOKEN}"
+  frontend:
+    build: frontend
+    ports: 
+      - "8080:8080"

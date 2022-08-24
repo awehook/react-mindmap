@@ -4,8 +4,8 @@ from flask import Flask, request
 from evernote.api.client import EvernoteClient
 from evernote.edam.notestore import NoteStore
 
-evernote_token = os.environ.get('evernote_token', None)
-assert  evernote_token is not None, 'Please set token with "export evernote_token=<your_token>"'
+evernote_token = os.environ.get('EVERNOTE_TOKEN', None)
+assert  evernote_token is not None, 'Please set token with "export EVERNOTE_TOKEN=<your_token>"'
 # Set up the NoteStore client
 client = EvernoteClient(token=evernote_token, china=True ,sandbox=False)
 notestore = client.get_note_store()
@@ -53,4 +53,4 @@ def findNotes():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001, threaded=True)
+    app.run(host="0.0.0.0", debug=True, port=5001, threaded=True)
