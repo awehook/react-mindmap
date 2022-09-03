@@ -4,8 +4,7 @@ import { iconClassName, browserOpenFile } from "@blink-mind/renderer-react";
 
 export function ToolbarItemOpen(props) {
   const onClickOpenFile = e => {
-    const { diagram } = props;
-    const diagramProps = diagram.getDiagramProps();
+    const { diagramProps, openNewModel } = props;
     const { controller } = diagramProps;
     browserOpenFile(".json,.blinkmind,.bm").then(txt => {
       let obj = JSON.parse(txt);
@@ -13,7 +12,7 @@ export function ToolbarItemOpen(props) {
           obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
       }
       let model = controller.run("deserializeModel", { controller, obj });
-      diagram.openNewModel(model);
+      openNewModel(model)
     });
   };
   return (

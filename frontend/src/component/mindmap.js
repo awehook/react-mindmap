@@ -4,6 +4,7 @@ import { Diagram, Icon } from "@blink-mind/renderer-react";
 import { MenuItem } from "@blueprintjs/core";
 import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
 import localforage from 'localforage';
+import { Button } from "@blueprintjs/core";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
@@ -17,6 +18,9 @@ import { KeyboardHotKeyWidget } from './keyboardHotKeyWidget'
 import { mySearchPlugin } from "./search/search-plugin";
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, HOT_KEY_NAME_SEARCH } from './search/utils';
 import { MyTopicWidget } from "./MyTopicWidget/index"
+import { Controller } from '@blink-mind/core';
+import memoizeOne from 'memoize-one';
+import { DefaultPlugin } from '@blink-mind/renderer-react';
 
 const log = debug("app");
 
@@ -224,9 +228,19 @@ function HotKeyPlugin() {
   }
 }
 
+function CounterPlugin() {
+  return {
+    getAllTopicKeys: (props) => {
+      const { model } = props;
+      console.log('getAllTopicKeys:', { model })
+      return model.topics.size;
+    }
+  }
+}
 
 const plugins = [
   // RichTextEditorPlugin(),
+  CounterPlugin(),
   HotKeyPlugin(),
   ThemeSelectorPlugin(),
   TopicReferencePlugin(),
@@ -239,36 +253,60 @@ const plugins = [
 export class Mindmap extends React.Component {
   constructor(props) {
     super(props);
-    this.initModel();
+    this.state = {
+      model: generateSimpleModel(),
+    }
+    this.controller = this.resolveController(plugins, DefaultPlugin)
+  }
+  controller;
+
+  openNewModel = (newModel) => {
+    const props = this.controller.run('getDiagramProps');
+    const { model, controller } = props;
+    controller.run('deleteRefKey', {
+      ...props,
+      topicKey: model.rootTopicKey
+    });
+    controller.run('operation', {
+      ...props,
+      opType: OpType.EXPAND_TO,
+      topicKey: newModel.focusKey,
+      model: newModel,
+      callback: () => {
+        const props = this.getDiagramProps();
+        const { model } = props;
+        controller.run('moveTopicToCenter', {
+          ...props,
+          topicKey: model.focusKey
+        });
+      }
+    });
   }
 
-  diagram;
-  diagramRef = ref => {
-    this.diagram = ref;
-    this.setState({});
-  };
-
-  initModel() {
-    const model = generateSimpleModel();
-    this.state = { model };
-  }
+  resolveController = memoizeOne((plugins = [], TheDefaultPlugin) => {
+    const defaultPlugin = TheDefaultPlugin();
+    return new Controller({
+      plugins: [plugins, defaultPlugin],
+      construct: false,
+      onChange: this.onChange
+    });
+    // this.controller.run('onConstruct');
+  });
 
   onClickUndo = e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("undo", props);
+    const props = this.controller.run('getDiagramProps');
+    this.controller.run("undo", props);
   };
 
   onClickRedo = e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("redo", props);
+    const props = this.controller.run('getDiagramProps')
+    this.controller.run("redo", props);
   };
 
   renderDiagram() {
+    console.log("renderDiagram")
     return (
       <Diagram
-        ref={this.diagramRef}
         model={this.state.model}
         onChange={this.onChange}
         plugins={plugins}
@@ -276,13 +314,18 @@ export class Mindmap extends React.Component {
     );
   }
 
+  getDiagramProps() {
+    return this.controller.run("getDiagramProps");
+  }
+
   renderToolbar() {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    const canUndo = controller.run("canUndo", props);
-    const canRedo = controller.run("canRedo", props);
+    const { controller  } = this;
+    const diagramProps = this.getDiagramProps();
+    const canUndo = controller.run("canUndo", diagramProps);
+    const canRedo = controller.run("canRedo", diagramProps);
     const toolbarProps = {
-      diagram: this.diagram,
+      diagramProps: diagramProps,
+      openNewModel: this.openNewModel,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
@@ -291,12 +334,21 @@ export class Mindmap extends React.Component {
     return <Toolbar {...toolbarProps} />;
   }
 
+  renderCounter() {
+      const nTopics = this.controller.run('getAllTopicKeys', { model: this.state.model })
+      const buttonProps = {
+        style: { height: "40px"},
+        disable: true
+      }
+      return <div className="Counter">
+        <Button {...buttonProps}> {nTopics} nodes</Button>
+      </div>;
+  }
+
   // autoSave per 60s
   autoSaveModel = () => setInterval(() => {
       if (this.state && this.state.model) {
-          const props = this.diagram.getDiagramProps();
-          const { controller } = props;
-          const serializedModel = controller.run('serializeModel', { controller, model: this.state.model });
+          const serializedModel = this.controller.run('serializeModel', { controller: this.controller, model: this.state.model });
           localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
           console.log(`Auto-Save at ${new Date()}`)
       }
@@ -307,8 +359,7 @@ export class Mindmap extends React.Component {
       let model = null;
       localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
         if (err == null && value) {
-            const props = this.diagram.getDiagramProps();
-            const { controller } = props;
+            const { controller } = this;
             let obj = JSON.parse(value);
             if (obj && obj.extData && obj.extData.hasOwnProperty('evernote')) {
                 obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
@@ -316,6 +367,7 @@ export class Mindmap extends React.Component {
             model = controller.run("deserializeModel", { controller, obj });
         }
         if (model) { 
+            console.log("Load diagram from cache!");
             this.setState({ model }) 
         };
       })
@@ -325,9 +377,9 @@ export class Mindmap extends React.Component {
   // debug
   componentDidUpdate() {
       console.log('componentDidUpdate')
-      const props = this.diagram.getDiagramProps();
-      const { controller } = props;
+      const { controller } = this;
       if (controller) {
+          console.log("componentDidUpdate:", { state: this.state})
           // console.log((controller.run('getUndoRedoStack')))
           console.log({ 
               redo: (controller.run('getUndoRedoStack')).redoStack.size, 
@@ -337,23 +389,21 @@ export class Mindmap extends React.Component {
   }
 
   onChange = (model, callback) => {
-    this.setState(
-      {
-        model
-      },
-      callback
-    );
+    this.setState({ model }, callback);
   };
 
   render() {
-    return (
-      <div className="mindmap">
-        {this.diagram && this.renderToolbar()}
-        {this.renderDiagram()}
+    const diagramProps = {
+      plugins: plugins,
+      model: this.state.model,
+      controller: this.controller
+    };
+    return <div className="mindmap">
+        { this.getDiagramProps() && this.renderToolbar()}
+        { this.controller.run('renderDiagram', diagramProps) }
+        { this.renderCounter()}
       </div>
-    );
   }
 }
 
-Mindmap.whyDidYouRender = true;
 export default Mindmap;
