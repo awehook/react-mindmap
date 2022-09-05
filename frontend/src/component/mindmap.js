@@ -1,10 +1,10 @@
 import React from "react";
 import { Map as ImmutableMap } from "immutable";
 import { Diagram, Icon } from "@blink-mind/renderer-react";
-import { MenuItem } from "@blueprintjs/core";
+import { Dialog, MenuItem  } from "@blueprintjs/core";
 import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
 import localforage from 'localforage';
-import { Button } from "@blueprintjs/core";
+import { Button, Classes } from "@blueprintjs/core";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
@@ -230,9 +230,9 @@ function HotKeyPlugin() {
 
 function CounterPlugin() {
   return {
-    getAllTopicKeys: (props) => {
+    getAllTopicCount: (props) => {
       const { model } = props;
-      console.log('getAllTopicKeys:', { model })
+      console.log('getAllTopicCount:', { model })
       return model.topics.size;
     }
   }
@@ -255,6 +255,14 @@ export class Mindmap extends React.Component {
     super(props);
     this.state = {
       model: generateSimpleModel(),
+      initialized: false,
+      loadFromCached: false,
+      dialog: {
+        isOpen: false,
+        children: "",
+        intent: "primary",
+        minimal:true
+      }
     }
     this.controller = this.resolveController(plugins, DefaultPlugin)
   }
@@ -335,12 +343,12 @@ export class Mindmap extends React.Component {
   }
 
   renderCounter() {
-      const nTopics = this.controller.run('getAllTopicKeys', { model: this.state.model })
+      const nTopics = this.controller.run('getAllTopicCount', { model: this.state.model })
       const buttonProps = {
         style: { height: "40px"},
-        disable: true
+        disable: "true"
       }
-      return <div className="Counter">
+      return <div className="bm-counter">
         <Button {...buttonProps}> {nTopics} nodes</Button>
       </div>;
   }
@@ -354,29 +362,52 @@ export class Mindmap extends React.Component {
       }
     }, 60000)
 
-  componentDidMount() {
+    async componentDidMount() {
       console.log('componentDidMount')
-      let model = null;
-      localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
-        if (err == null && value) {
+      this.autoSaveModel();
+      await localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
+        if (err === null && value) {
             const { controller } = this;
             let obj = JSON.parse(value);
             if (obj && obj.extData && obj.extData.hasOwnProperty('evernote')) {
                 obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
             }
-            model = controller.run("deserializeModel", { controller, obj });
+            const model = controller.run("deserializeModel", { controller, obj });
+            const nTopics = controller.run("getAllTopicCount", { model })
+            if (model && nTopics) { 
+              this.setState({ dialog: {
+                isOpen: true,
+                children: <>
+                  { `Detect previously cached graph containing ${nTopics} topics. Do you want to load your cached graph?` }
+                  <Button onClick={() => this.setState({ model, loadFromCached: true, initialized: true, dialog: {isOpen: false}}) }>Yes</Button>
+                  <Button onClick={() => this.setState({ initialized: true, dialog: {isOpen: false} }) }>No</Button> 
+                </>
+              }})
+              return ;
+            }; 
         }
-        if (model) { 
-            console.log("Load diagram from cache!");
-            this.setState({ model }) 
-        };
+        this.setState({ initialized: true });
       })
-      this.autoSaveModel()
+  }
+
+  onLoadFromCached = () => {
+    const nTopics = this.controller.run("getAllTopicCount", { model: this.state.model });
+    this.setState({ dialog: {
+      isOpen: true,
+      children: <>
+        <div className={Classes.DIALOG_BODY}>
+        { `Load ${nTopics} topics from cache!` }
+        </div>
+        <Button onClick={() => this.setState({ loadFromCached: null, dialog: {isOpen: false} }) }>OK</Button> 
+      </>
+    }})
   }
 
   // debug
   componentDidUpdate() {
-      console.log('componentDidUpdate')
+      if (this.state.loadFromCached && !this.state.dialog.isOpen) {
+        this.onLoadFromCached();
+      }
       const { controller } = this;
       if (controller) {
           console.log("componentDidUpdate:", { state: this.state})
@@ -398,11 +429,18 @@ export class Mindmap extends React.Component {
       model: this.state.model,
       controller: this.controller
     };
-    return <div className="mindmap">
-        { this.getDiagramProps() && this.renderToolbar()}
-        { this.controller.run('renderDiagram', diagramProps) }
-        { this.renderCounter()}
-      </div>
+    console.log("render-test:", {state: this.state})
+    return <div>
+        {
+          <div className="mindmap" style={{visibility: this.state.initialized ? 'visible' : 'hidden'}}>
+            <Dialog 
+                  {...this.state.dialog}></Dialog>
+            { this.getDiagramProps() && this.renderToolbar()}
+            { this.controller.run('renderDiagram', diagramProps) }
+            { this.renderCounter() }
+          </div> 
+      }
+      </div>;
   }
 }
 
