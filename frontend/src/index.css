@@ -15,7 +15,7 @@ code {
     monospace;
 }
 
-.bm-counter {
+.bm-left-conner {
   position: absolute;
   left: 24px;
   bottom: 14px;

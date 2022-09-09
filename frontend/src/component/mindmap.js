@@ -2,7 +2,7 @@ import React from "react";
 import { Map as ImmutableMap } from "immutable";
 import { Diagram, Icon } from "@blink-mind/renderer-react";
 import { Dialog, MenuItem  } from "@blueprintjs/core";
-import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
+import { OpType, getAllSubTopicKeys, ModelModifier } from "@blink-mind/core";
 import localforage from 'localforage';
 import { Button, Classes } from "@blueprintjs/core";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
@@ -21,6 +21,7 @@ import { MyTopicWidget } from "./MyTopicWidget/index"
 import { Controller } from '@blink-mind/core';
 import memoizeOne from 'memoize-one';
 import { DefaultPlugin } from '@blink-mind/renderer-react';
+
 
 const log = debug("app");
 
@@ -228,6 +229,33 @@ function HotKeyPlugin() {
   }
 }
 
+function FixCollapseAllPlugin() {
+  return {
+      getOpMap(ctx, next) {
+        const opMap = next();
+
+        // fixed version based on https://github.com/awehook/blink-mind/blob/3dcacccc4d71352f8c2560b48f4f94fd324cbd7b/packages/core/src/models/modifiers/modifiers.ts#L36
+        const collapseAll = ({ model }) => {
+          log('collapseAll');
+          const topicKeys = getAllSubTopicKeys(model, model.editorRootTopicKey);
+          log(model);
+          model = model.withMutations(m => {
+            topicKeys.forEach(topicKey => {
+              m.setIn(['topics', topicKey, 'collapse'], true);
+            });
+          });
+          // focus to root topic to avoid referencing unrendered topics
+          model = ModelModifier.focusTopic({ model, topicKey: model.editorRootTopicKey });
+          log(model);
+          return model;
+        }
+
+        opMap.set(OpType.COLLAPSE_ALL, collapseAll)
+        return opMap;
+      }
+  }
+}
+
 function CounterPlugin() {
   return {
     getAllTopicCount: (props) => {
@@ -240,6 +268,7 @@ function CounterPlugin() {
 
 const plugins = [
   // RichTextEditorPlugin(),
+  FixCollapseAllPlugin(),
   CounterPlugin(),
   HotKeyPlugin(),
   ThemeSelectorPlugin(),
@@ -348,23 +377,35 @@ export class Mindmap extends React.Component {
         style: { height: "40px"},
         disable: "true"
       }
-      return <div className="bm-counter">
+      return <div>
         <Button {...buttonProps}> {nTopics} nodes</Button>
       </div>;
   }
 
-  // autoSave per 60s
-  autoSaveModel = () => setInterval(() => {
+  renderCacheButton() {
+      const buttonProps = {
+        style: { height: "40px"},
+        onClick: () => this.saveCache(() => {alert(`Auto-Save at ${new Date()}`)})
+      }
+      return <div>
+        <Button {...buttonProps}> Save Cache </Button>
+      </div>;
+  }
+
+  saveCache = (callback=() => {}) => {
       if (this.state && this.state.model) {
           const serializedModel = this.controller.run('serializeModel', { controller: this.controller, model: this.state.model });
           localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
           console.log(`Auto-Save at ${new Date()}`)
+          callback()
       }
-    }, 60000)
+  }
 
-    async componentDidMount() {
+  // autoSave per 60s
+  autoSaveModel = () => setInterval(this.saveCache, 60000)
+
+  async componentDidMount() {
       console.log('componentDidMount')
-      this.autoSaveModel();
       await localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
         if (err === null && value) {
             const { controller } = this;
@@ -388,6 +429,7 @@ export class Mindmap extends React.Component {
         }
         this.setState({ initialized: true });
       })
+      this.autoSaveModel();
   }
 
   onLoadFromCached = () => {
@@ -433,11 +475,13 @@ export class Mindmap extends React.Component {
     return <div>
         {
           <div className="mindmap" style={{visibility: this.state.initialized ? 'visible' : 'hidden'}}>
-            <Dialog 
-                  {...this.state.dialog}></Dialog>
+            <Dialog {...this.state.dialog}></Dialog>
             { this.getDiagramProps() && this.renderToolbar()}
             { this.controller.run('renderDiagram', diagramProps) }
-            { this.renderCounter() }
+            <div className="bm-left-conner">
+              { this.renderCounter() }
+              { this.renderCacheButton() }
+            </div>
           </div> 
       }
       </div>;
