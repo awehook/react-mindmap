@@ -1,0 +1,31 @@
+
+2022-09-03: Remove diagram in Mindmap component
+
+The old way is to use `diagram` as a reference of <Diagram>. When we refer <Diagram>, this.diagram will be updated. And we can retrieve props by `this.diagram.getDiagramProps`. 
+
+However, this causes a problem when I was trying to add a new Counter component to show the total number of topics
+
+```
+render() {
+    return (
+        <div className="mindmap">
+            {this.diagram && this.renderToolbar()} // render a Toolbar component
+            {this.renderDiagram()} // render a Diagram component
+            {this.renderCounter()} // render a Counter component
+        </div>
+    );
+}
+```
+
+The Toolbar and Counter rely on the Diagram to update the `this.diagram`. The correct process is
+
+1. the model is in status A.
+2. the model is changed to status B.
+3. the Toolbar, Diagram and Counter components are rendered. In this moment, the Toolbar and Counter use `this.diagram` to retrieve their data. Because at this moment, `this.diagram` hasn't been updated, it points to the model in status A. After the Diagram is rendered, the `this.diagram` points to the model in status B.
+4. Because in the previous render, the Toolbar and Counter uses the model in status A. We hope to rerender them to use the model in status B. 
+
+However, step 4 will not be performed. Because in the step 3, the Diagram updates a ref, which will not trigger a rerender. 
+
+So, using a ref to Diagram and retrieving data from the ref will cause the Toolbar and Counter always show data in the previos step.
+
+The original Diagram component doesn't support the previous Counter component well. The solution is to not use Diagram component. Instead, we modify the code of Diagram component a little bit and add the Toolbar component and Counter component into Diagram component. The source code of Diagram can be found at https://github.com/awehook/blink-mind/blob/v0.0.20-beta.6/packages/renderer-react/src/components/diagram.tsx.

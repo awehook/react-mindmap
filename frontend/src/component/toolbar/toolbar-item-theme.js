@@ -10,8 +10,7 @@ import React from "react";
 
 export function ToolbarItemTheme(props) {
   const onClickSetTheme = themeKey => e => {
-    const { diagram } = props;
-    const diagramProps = diagram.getDiagramProps();
+    const { diagramProps } = props;
     const { controller } = diagramProps;
     controller.run("setTheme", { ...diagramProps, themeKey });
   };
