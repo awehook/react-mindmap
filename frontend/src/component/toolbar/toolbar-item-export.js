@@ -6,8 +6,7 @@ import { downloadFile } from "../../utils";
 
 export function ToolbarItemExport(props) {
   const onClickExportJson = e => {
-    const { diagram } = props;
-    const diagramProps = diagram.getDiagramProps();
+    const { diagramProps } = props;
     const { controller, model } = diagramProps;
 
     const json = controller.run("serializeModel", diagramProps);

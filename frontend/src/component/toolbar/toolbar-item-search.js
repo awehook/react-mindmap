@@ -5,8 +5,7 @@ import { iconClassName, IconName } from "@blink-mind/renderer-react";
 
 export function ToolbarItemSearch(props) {
   const onClickSearch = e => {
-    const { diagram } = props;
-    const diagramProps = diagram.getDiagramProps();
+    const { diagramProps } = props;
     const { controller } = diagramProps;
 
     controller.run("operation", {

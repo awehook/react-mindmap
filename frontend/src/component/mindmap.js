@@ -1,9 +1,10 @@
 import React from "react";
 import { Map as ImmutableMap } from "immutable";
 import { Diagram, Icon } from "@blink-mind/renderer-react";
-import { MenuItem } from "@blueprintjs/core";
-import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
+import { Dialog, MenuItem  } from "@blueprintjs/core";
+import { OpType, getAllSubTopicKeys, ModelModifier } from "@blink-mind/core";
 import localforage from 'localforage';
+import { Button, Classes } from "@blueprintjs/core";
 import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
@@ -17,6 +18,10 @@ import { KeyboardHotKeyWidget } from './keyboardHotKeyWidget'
 import { mySearchPlugin } from "./search/search-plugin";
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, HOT_KEY_NAME_SEARCH } from './search/utils';
 import { MyTopicWidget } from "./MyTopicWidget/index"
+import { Controller } from '@blink-mind/core';
+import memoizeOne from 'memoize-one';
+import { DefaultPlugin } from '@blink-mind/renderer-react';
+
 
 const log = debug("app");
 
@@ -224,9 +229,47 @@ function HotKeyPlugin() {
   }
 }
 
+function FixCollapseAllPlugin() {
+  return {
+      getOpMap(ctx, next) {
+        const opMap = next();
+
+        // fixed version based on https://github.com/awehook/blink-mind/blob/3dcacccc4d71352f8c2560b48f4f94fd324cbd7b/packages/core/src/models/modifiers/modifiers.ts#L36
+        const collapseAll = ({ model }) => {
+          log('collapseAll');
+          const topicKeys = getAllSubTopicKeys(model, model.editorRootTopicKey);
+          log(model);
+          model = model.withMutations(m => {
+            topicKeys.forEach(topicKey => {
+              m.setIn(['topics', topicKey, 'collapse'], true);
+            });
+          });
+          // focus to root topic to avoid referencing unrendered topics
+          model = ModelModifier.focusTopic({ model, topicKey: model.editorRootTopicKey });
+          log(model);
+          return model;
+        }
+
+        opMap.set(OpType.COLLAPSE_ALL, collapseAll)
+        return opMap;
+      }
+  }
+}
+
+function CounterPlugin() {
+  return {
+    getAllTopicCount: (props) => {
+      const { model } = props;
+      console.log('getAllTopicCount:', { model })
+      return model.topics.size;
+    }
+  }
+}
 
 const plugins = [
   // RichTextEditorPlugin(),
+  FixCollapseAllPlugin(),
+  CounterPlugin(),
   HotKeyPlugin(),
   ThemeSelectorPlugin(),
   TopicReferencePlugin(),
@@ -239,36 +282,68 @@ const plugins = [
 export class Mindmap extends React.Component {
   constructor(props) {
     super(props);
-    this.initModel();
+    this.state = {
+      model: generateSimpleModel(),
+      initialized: false,
+      loadFromCached: false,
+      dialog: {
+        isOpen: false,
+        children: "",
+        intent: "primary",
+        minimal:true
+      }
+    }
+    this.controller = this.resolveController(plugins, DefaultPlugin)
+  }
+  controller;
+
+  openNewModel = (newModel) => {
+    const props = this.controller.run('getDiagramProps');
+    const { model, controller } = props;
+    controller.run('deleteRefKey', {
+      ...props,
+      topicKey: model.rootTopicKey
+    });
+    controller.run('operation', {
+      ...props,
+      opType: OpType.EXPAND_TO,
+      topicKey: newModel.focusKey,
+      model: newModel,
+      callback: () => {
+        const props = this.getDiagramProps();
+        const { model } = props;
+        controller.run('moveTopicToCenter', {
+          ...props,
+          topicKey: model.focusKey
+        });
+      }
+    });
   }
 
-  diagram;
-  diagramRef = ref => {
-    this.diagram = ref;
-    this.setState({});
-  };
-
-  initModel() {
-    const model = generateSimpleModel();
-    this.state = { model };
-  }
+  resolveController = memoizeOne((plugins = [], TheDefaultPlugin) => {
+    const defaultPlugin = TheDefaultPlugin();
+    return new Controller({
+      plugins: [plugins, defaultPlugin],
+      construct: false,
+      onChange: this.onChange
+    });
+    // this.controller.run('onConstruct');
+  });
 
   onClickUndo = e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("undo", props);
+    const props = this.controller.run('getDiagramProps');
+    this.controller.run("undo", props);
   };
 
   onClickRedo = e => {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    controller.run("redo", props);
+    const props = this.controller.run('getDiagramProps')
+    this.controller.run("redo", props);
   };
 
   renderDiagram() {
+    console.log("renderDiagram")
     return (
       <Diagram
-        ref={this.diagramRef}
         model={this.state.model}
         onChange={this.onChange}
         plugins={plugins}
@@ -276,13 +351,18 @@ export class Mindmap extends React.Component {
     );
   }
 
+  getDiagramProps() {
+    return this.controller.run("getDiagramProps");
+  }
+
   renderToolbar() {
-    const props = this.diagram.getDiagramProps();
-    const { controller } = props;
-    const canUndo = controller.run("canUndo", props);
-    const canRedo = controller.run("canRedo", props);
+    const { controller  } = this;
+    const diagramProps = this.getDiagramProps();
+    const canUndo = controller.run("canUndo", diagramProps);
+    const canRedo = controller.run("canRedo", diagramProps);
     const toolbarProps = {
-      diagram: this.diagram,
+      diagramProps: diagramProps,
+      openNewModel: this.openNewModel,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
@@ -291,43 +371,88 @@ export class Mindmap extends React.Component {
     return <Toolbar {...toolbarProps} />;
   }
 
-  // autoSave per 60s
-  autoSaveModel = () => setInterval(() => {
+  renderCounter() {
+      const nTopics = this.controller.run('getAllTopicCount', { model: this.state.model })
+      const buttonProps = {
+        style: { height: "40px"},
+        disable: "true"
+      }
+      return <div>
+        <Button {...buttonProps}> {nTopics} nodes</Button>
+      </div>;
+  }
+
+  renderCacheButton() {
+      const buttonProps = {
+        style: { height: "40px"},
+        onClick: () => this.saveCache(() => {alert(`Auto-Save at ${new Date()}`)})
+      }
+      return <div>
+        <Button {...buttonProps}> Save Cache </Button>
+      </div>;
+  }
+
+  saveCache = (callback=() => {}) => {
       if (this.state && this.state.model) {
-          const props = this.diagram.getDiagramProps();
-          const { controller } = props;
-          const serializedModel = controller.run('serializeModel', { controller, model: this.state.model });
+          const serializedModel = this.controller.run('serializeModel', { controller: this.controller, model: this.state.model });
           localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
           console.log(`Auto-Save at ${new Date()}`)
+          callback()
       }
-    }, 60000)
+  }
 
-  componentDidMount() {
+  // autoSave per 60s
+  autoSaveModel = () => setInterval(this.saveCache, 60000)
+
+  async componentDidMount() {
       console.log('componentDidMount')
-      let model = null;
-      localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
-        if (err == null && value) {
-            const props = this.diagram.getDiagramProps();
-            const { controller } = props;
+      await localforage.getItem('react-mindmap-evernote-mind', (err, value) => {
+        if (err === null && value) {
+            const { controller } = this;
             let obj = JSON.parse(value);
             if (obj && obj.extData && obj.extData.hasOwnProperty('evernote')) {
                 obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
             }
-            model = controller.run("deserializeModel", { controller, obj });
+            const model = controller.run("deserializeModel", { controller, obj });
+            const nTopics = controller.run("getAllTopicCount", { model })
+            if (model && nTopics) { 
+              this.setState({ dialog: {
+                isOpen: true,
+                children: <>
+                  { `Detect previously cached graph containing ${nTopics} topics. Do you want to load your cached graph?` }
+                  <Button onClick={() => this.setState({ model, loadFromCached: true, initialized: true, dialog: {isOpen: false}}) }>Yes</Button>
+                  <Button onClick={() => this.setState({ initialized: true, dialog: {isOpen: false} }) }>No</Button> 
+                </>
+              }})
+              return ;
+            }; 
         }
-        if (model) { 
-            this.setState({ model }) 
-        };
+        this.setState({ initialized: true });
       })
-      this.autoSaveModel()
+      this.autoSaveModel();
+  }
+
+  onLoadFromCached = () => {
+    const nTopics = this.controller.run("getAllTopicCount", { model: this.state.model });
+    this.setState({ dialog: {
+      isOpen: true,
+      children: <>
+        <div className={Classes.DIALOG_BODY}>
+        { `Load ${nTopics} topics from cache!` }
+        </div>
+        <Button onClick={() => this.setState({ loadFromCached: null, dialog: {isOpen: false} }) }>OK</Button> 
+      </>
+    }})
   }
 
   // debug
   componentDidUpdate() {
-      console.log('componentDidUpdate')
-      const props = this.diagram.getDiagramProps();
-      const { controller } = props;
+      if (this.state.loadFromCached && !this.state.dialog.isOpen) {
+        this.onLoadFromCached();
+      }
+      const { controller } = this;
       if (controller) {
+          console.log("componentDidUpdate:", { state: this.state})
           // console.log((controller.run('getUndoRedoStack')))
           console.log({ 
               redo: (controller.run('getUndoRedoStack')).redoStack.size, 
@@ -337,23 +462,30 @@ export class Mindmap extends React.Component {
   }
 
   onChange = (model, callback) => {
-    this.setState(
-      {
-        model
-      },
-      callback
-    );
+    this.setState({ model }, callback);
   };
 
   render() {
-    return (
-      <div className="mindmap">
-        {this.diagram && this.renderToolbar()}
-        {this.renderDiagram()}
-      </div>
-    );
+    const diagramProps = {
+      plugins: plugins,
+      model: this.state.model,
+      controller: this.controller
+    };
+    console.log("render-test:", {state: this.state})
+    return <div>
+        {
+          <div className="mindmap" style={{visibility: this.state.initialized ? 'visible' : 'hidden'}}>
+            <Dialog {...this.state.dialog}></Dialog>
+            { this.getDiagramProps() && this.renderToolbar()}
+            { this.controller.run('renderDiagram', diagramProps) }
+            <div className="bm-left-conner">
+              { this.renderCounter() }
+              { this.renderCacheButton() }
+            </div>
+          </div> 
+      }
+      </div>;
   }
 }
 
-Mindmap.whyDidYouRender = true;
 export default Mindmap;
