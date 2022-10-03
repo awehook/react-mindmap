@@ -11,5 +11,5 @@ services:
     ports: 
       - "8080:8080"
     environment:
-      REACT_APP_EVERNOTE_SERVER_HOST: "localhost"
-      REACT_APP_EVERNOTE_SERVER_PORT: "5001"
+      EVERNOTE_SERVER_HOST: "catwang.top"
+      EVERNOTE_SERVER_PORT: "5000"
