@@ -5,6 +5,7 @@ RUN npm config set registry https://registry.npm.taobao.org \
 WORKDIR /app
 COPY package.json . 
 RUN npm install
+RUN  sleep 100
 COPY . .
 RUN npm run build
 
@@ -14,7 +15,6 @@ RUN npm config set registry https://registry.npm.taobao.org \
     && yarn config set registry https://registry.npm.taobao.org
 WORKDIR /app
 RUN npm install -g http-server
-CMD sleep 1000
 COPY --from=build /app/build ./react-mindmap
 COPY env.sh .env .
 EXPOSE 8080
