@@ -53,4 +53,4 @@ def findNotes():
     return response
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True, port=5001, threaded=True)
+    app.run(host="0.0.0.0", debug=True, port=5000, threaded=True)

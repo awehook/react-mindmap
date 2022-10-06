@@ -11,7 +11,10 @@ import EvernoteClient from '../../evernote/client.js';
 import { memorize, throttled } from '../../utils/index.js';
 import './search-panel.css';
 
-const evernoteCient = new EvernoteClient();
+const evernoteCient = new EvernoteClient(
+  (process.env.NODE_ENV == 'production' ?  window.__env__?.REACT_APP_EVERNOTE_SERVER_HOST : process.env.REACT_APP_EVERNOTE_SERVER_HOST ) ?? 'localhost', 
+  (process.env.NODE_ENV == 'production' ?  window.__env__?.REACT_APP_EVERNOTE_SERVER_PORT : process.env.REACT_APP_EVERNOTE_SERVER_PORT ) ?? 5000
+);
 const NavOmniBar = Omnibar;
 
 const StyledNavOmniBar = styled(NavOmniBar)`
