@@ -60,9 +60,9 @@ const newOptions = {
         return newModel;
     },
     ASSOCIATE_A_NOTE: (props) => {
-        let { model } = props;
-        model = model.set('focusMode', FOCUS_MODE_SEARCH_NOTE_TO_ATTACH);
-        return model;
+        let { controller } = props;
+        controller.run('operation', { ...props, focusMode: FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, opType: OpType.FOCUS_TOPIC })
+        return controller.currentModel;
     },
     OPEN_EVERNOTE_LINK: (props) => {
         const { topicKey, controller } = props;
@@ -82,7 +82,7 @@ const items = [
   {
     icon: 'edit',
     label: 'Associate a note',
-    shortcut: ['Space'],
+    // shortcut: ['Space'],
     rootCanUse: false,
     opType: 'ASSOCIATE_A_NOTE',
     opOperation: newOptions.ASSOCIATE_A_NOTE
@@ -90,12 +90,55 @@ const items = [
   {
     icon: 'edit',
     label: 'Open evernote link',
-    shortcut: ['Space'],
+    // shortcut: ['Space'],
     rootCanUse: false,
     opType: 'OPEN_EVERNOTE_LINK',
     opOperation: newOptions.OPEN_EVERNOTE_LINK
   }
 ]
+
+function DebugPlugin()
+{
+    return {
+        beforeOpFunction: (props, next) => {
+          const ret = next();
+          console.log('[beforeOpFunction]', { props })
+          return ret;
+        },
+        afterOpFunction: (props, next) => {
+          const ret = next();
+          console.log('[afterOpFunction]', { props});
+          return ret;
+        }
+    }
+
+}
+
+function AddNewOperations()
+{
+    return {
+      beforeOpFunction: (props) => {
+        const { opType, topicKey, model, controller } = props;
+          if (
+            opType === OpType.DELETE_TOPIC &&
+            topicKey !== model.editorRootTopicKey
+          ) {
+              controller.run(
+                'operation',
+                { ...props, 
+                  opType: 'DELETE_NOTE_RELATION',
+                });
+              return controller.currentModel;
+          } else {
+              return model;
+          }
+      },
+      getOpMap: function(ctx, next) {
+          let opMap = next();
+          return new Map([...opMap, ...Object.keys(newOptions).map(key => [key, newOptions[key]])]);
+      }
+    }
+}
 
 function HotKeyPlugin() {
     return {
@@ -190,27 +233,6 @@ function HotKeyPlugin() {
           console.log({allow: res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, props})
           return res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH;
       },
-      beforeOpFunction: (props) => {
-          const { controller, opType, model, topicKey } = props;
-          console.log({ opType, focusModel: model.focusMode, props})
-          if (
-            opType === OpType.DELETE_TOPIC &&
-            topicKey !== model.editorRootTopicKey
-          ) {
-              controller.run(
-                'operation',
-                { ...props, 
-                  opType: 'DELETE_NOTE_RELATION',
-                });
-              return controller.currentModel;
-          } else {
-              return model;
-          }
-      },
-      getOpMap: function(ctx, next) {
-          let opMap = next();
-          return new Map([...opMap, ...Object.keys(newOptions).map(key => [key, newOptions[key]])]);
-      },
       renderTopicContentOthers: function(ctx, next) {
           const { topicKey, model }  = ctx;
           const evernoteData = model.getIn(['extData', 'evernote'], new ImmutableMap());
@@ -268,6 +290,8 @@ function CounterPlugin() {
 
 const plugins = [
   // RichTextEditorPlugin(),
+  DebugPlugin(),
+  AddNewOperations(),
   FixCollapseAllPlugin(),
   CounterPlugin(),
   HotKeyPlugin(),

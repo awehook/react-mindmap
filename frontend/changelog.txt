@@ -29,3 +29,7 @@ However, step 4 will not be performed. Because in the step 3, the Diagram update
 So, using a ref to Diagram and retrieving data from the ref will cause the Toolbar and Counter always show data in the previos step.
 
 The original Diagram component doesn't support the previous Counter component well. The solution is to not use Diagram component. Instead, we modify the code of Diagram component a little bit and add the Toolbar component and Counter component into Diagram component. The source code of Diagram can be found at https://github.com/awehook/blink-mind/blob/v0.0.20-beta.6/packages/renderer-react/src/components/diagram.tsx.
+
+2022-10-07: Fix the bug of ASSOCIATE_A_NOTE
+
+Use `controller.run('operations', {opType: FOCUS_TOPIC})` instead of modify model directly.
