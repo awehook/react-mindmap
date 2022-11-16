@@ -33,7 +33,7 @@ export function mySearchPlugin() {
       const { model } = props;
       if (model.focusMode === FOCUS_MODE_SEARCH_NOTE_TO_ATTACH) {
         const searchPanelProps = {
-          key: 'search-panel',
+          key: 'search-panel-evernote',
           ...props,
           setSearchWorld
         };

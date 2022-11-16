@@ -10,6 +10,7 @@ export function ToolbarItemSearch(props) {
 
     controller.run("operation", {
       ...diagramProps,
+      model: controller.currentModel,
       opType: OpType.SET_FOCUS_MODE,
       focusMode: FOCUS_MODE_SEARCH
     });

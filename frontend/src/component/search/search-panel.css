@@ -5,3 +5,34 @@
   max-height: calc(60vh - 40px);
   overflow: auto;
 }
+
+.clearfix:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.left {
+  display: block;
+  float: left;
+} 
+
+.right {
+  display: block;
+  float: right;
+} 
+
+/* from https://freefrontend.com/css-tags/ */
+.noteAttr {
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 4px 6px;
+  font-family: Menlo, Monaco, "Courier New", Courier, monospace;
+  font-size: 0.78em;
+  line-height: 1.5;
+  color: #1f2029;
+  background: #ffeaa7;
+  border-radius: 2px;
+}

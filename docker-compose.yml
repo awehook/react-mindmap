@@ -1,9 +1,9 @@
-version: "3.9"
+version: "3.9.1"
 services:
   backend: 
     build: backend
     ports: 
-      - "5000:5000"
+      - "5000:5001"
     environment:
       EVERNOTE_TOKEN: "${EVERNOTE_TOKEN}"
   frontend:
@@ -11,5 +11,4 @@ services:
     ports: 
       - "8080:8080"
     environment:
-      EVERNOTE_SERVER_HOST: "example.com"
-      EVERNOTE_SERVER_PORT: "5000"
+      EVERNOTE_API_ENDPOINT: "${EVERNOTE_API_ENDPOINT}"

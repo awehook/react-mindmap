@@ -3,18 +3,16 @@ import fuzzysort from 'fuzzysort';
 import { FocusMode, OpType, BlockType } from '@blink-mind/core';
 import * as React from 'react';
 import { Omnibar } from '@blueprintjs/select';
+import { format } from 'date-fns'
+import { nonEmpty } from '../../utils/index.js';
 import styled from 'styled-components';
 import {
   Popover,
 } from '@blueprintjs/core';
-import EvernoteClient from '../../evernote/client.js';
-import { memorize, throttled } from '../../utils/index.js';
+import { getDeleteNotes, getLasteNotes, mergeNotes, removeDeletedNotes } from '../../evernote/noteHelper';
+import { getNotesFromModel, throttled } from '../../utils/index.js';
 import './search-panel.css';
 
-const evernoteCient = new EvernoteClient(
-  (process.env.NODE_ENV == 'production' ?  window.__env__?.REACT_APP_EVERNOTE_SERVER_HOST : process.env.REACT_APP_EVERNOTE_SERVER_HOST ) ?? 'localhost', 
-  (process.env.NODE_ENV == 'production' ?  window.__env__?.REACT_APP_EVERNOTE_SERVER_PORT : process.env.REACT_APP_EVERNOTE_SERVER_PORT ) ?? 5000
-);
 const NavOmniBar = Omnibar;
 
 const StyledNavOmniBar = styled(NavOmniBar)`
@@ -24,7 +22,7 @@ const StyledNavOmniBar = styled(NavOmniBar)`
 `;
 
 const TopicTitle = styled.div`
-  margin: 0 5px;
+  // margin: 0 5px;
   padding: 10px 5px;
   width: 100%;
   font-size: 16px;
@@ -59,46 +57,6 @@ const TipContent = styled.div`
 const INPUT_PROPS = {
   placeholder: 'Search'
 };
-
-const getLasteNotes = (start, offset, sync, callback) => {
-    const results = evernoteCient.getAllNoteList({start, offset, filter_order: 2}, sync, callback);
-    if (!sync) return;
-    let notes;
-    if (results.hasOwnProperty('error')) {
-      notes = []
-    } else {
-      notes = results.notes
-    }
-    return notes;
-}
-
-const getAllNotes = memorize((start, offset, sync=true, callback=null) => {
-    const results = evernoteCient.getAllNoteList({ start, offset }, sync, callback);
-    if (!sync) return;
-    let notes;
-    if (results.hasOwnProperty('error')) {
-      notes = []
-    } else {
-      notes = results.notes
-    }
-    return notes;
-  }
-)
-
-const mergeNotes = (oldNotes, newNotes) => {
-    if (!oldNotes) return newNotes;
-    let uniqueKeys = new Set();
-    return [...oldNotes, ...newNotes].filter(note => {
-        if (uniqueKeys.has(note.guid)) {
-            return false;
-        } else {
-          uniqueKeys.add(note.guid)
-          return true;
-        }
-    })
-}
-
-const offset = 500;
 
 export function SearchPanel(props) {
   // const [cur, setCur] = React.useState(offset);
@@ -160,15 +118,23 @@ export function SearchPanel(props) {
     const title =  needTip
       ? noteTitle.substr(0, maxLength) + '...'
       : noteTitle;
+    const notebooks = controller.currentModel.getIn(["extData", "allnotes", "notebooks"], new Map())
+    const updatedTime = nonEmpty(note?.updated) ? format(new Date(note.updated), 'yyyy-MM-dd HH:mm:SS') : "UnknownTime"
+    const children = <div className={ "clearfix" }> 
+            <span className={ "left" } dangerouslySetInnerHTML={{__html: title}} /> 
+            <span className={ "right noteAttr" } > { updatedTime } </span> 
+            <span className={ "right noteAttr" } > { notebooks.get(note.notebookGuid) ?? 'Unknown' } </span> 
+        </div>
     const titleProps = {
       key: guid,
       onClick: attachNote({ guid, title: note.title }),
-      dangerouslySetInnerHTML: {__html: title}
+      // dangerouslySetInnerHTML: {__html: title + "  " + note.notebookGuid },
+      children: children
     };
     const titleEl = <TopicTitle {...titleProps}></TopicTitle>;
     const tip = (
       <Tip>
-        <TipContent dangerouslySetInnerHTML={ {__html: title} }></TipContent>
+        <TipContent dangerouslySetInnerHTML={ {__html: noteTitle } }></TipContent>
       </Tip>
     );
     const popoverProps = {
@@ -188,59 +154,41 @@ export function SearchPanel(props) {
   ) => {
      return fuzzysort.go(query.toLowerCase(), 
               items,
-              {threshold: -10000, key: 'title'}).map(item => {
-                const {guid, title} = item['obj'];
-                return {guid, title, fuzzySearchResult: item, highlighted: fuzzysort.highlight(item, '<b class="highlight">')};
+              {threshold: -10000, key: 'title'}).map(res => {
+                return {
+                  ...res['obj'],
+                  fuzzySearchResult: res, 
+                  highlighted: fuzzysort.highlight(res, '<b class="highlight">')};
               })
   };
-
-  React.useEffect(
-    () => {
-        console.log((controller.currentModel.getIn(['extData', 'allnotes', 'notes'], {})).length);
-    }, [controller]);
-
-  React.useEffect(
-      () => { 
-        setInterval(
-            () => {
-                const cur = controller.currentModel.getIn(['extData', 'allnotes', 'cur'], 0);
-                if (cur > 10000) return;
-                getAllNotes(cur, cur + offset, false, (xhr) => {
-                    console.log(xhr.responseText); // 请求成功
-                    const newNotes = JSON.parse(xhr.responseText);
-                    let newModel = controller.currentModel.updateIn(['extData', 'allnotes', 'notes'], notes => mergeNotes(notes, newNotes['notes']))
-                    newModel = newModel.updateIn(['extData', 'allnotes', 'cur'], cur => cur === undefined ? offset : cur + offset)
-                    controller.change(newModel, () => {})
-                    // setNotes(notes => [...(new Set([...notes, ...newNotes['notes']]))])
-                    // setCur(cur => cur + offset);
-                    console.log('update notes')
-                })
-            }
-          , 20000)
-      }, []);
 
   // update latest 100 notes
   const onQueryChange = React.useCallback(throttled(
       () => {
-          getLasteNotes(0, 100, false, (xhr) => {
-              console.log(xhr.responseText); // 请求成功
-              const newNotes = JSON.parse(xhr.responseText);
-              let newModel = controller.currentModel.updateIn(['extData', 'allnotes', 'notes'], notes => mergeNotes(notes, newNotes['notes']))
-              controller.change(newModel, () => {})
-              console.log('update latest 100 notes')
+          getDeleteNotes(false, (xhr) => {
+              console.log('deleted', xhr.responseText); // 请求成功
+              const deletedNotes = JSON.parse(xhr.responseText)?.['notes'] ?? [];
+              getLasteNotes(0, 100, false, false, (xhr) => {
+                  console.log('latest', xhr.responseText); // 请求成功
+                  const newNotes = JSON.parse(xhr.responseText)?.['notes'] ?? [];
+                  let newModel = controller.currentModel.updateIn(['extData', 'allnotes', 'notes'], notes => removeDeletedNotes(deletedNotes, mergeNotes(notes ?? [], newNotes)))
+                  controller.change(newModel, () => {})
+                  console.log('update latest 100 notes')
+              });
           })
       }, 20000)
   , [])
 
+  const items = filterAlreadyExists(getNotesFromModel(controller.currentModel, []))
+  console.log("[StyledNavOmniBar]:", {items})
   return (
     <StyledNavOmniBar
       inputProps={INPUT_PROPS}
       itemListPredicate={filterMatches}
       onQueryChange={onQueryChange}
       isOpen={true}
-      items={filterAlreadyExists(controller.currentModel.getIn(['extData', 'allnotes', 'notes'], []))}
+      items={ items }
       itemRenderer={renderItem}
-      // onItemSelect={handleItemSelect}
       onClose={onClose}
       resetOnSelect={true}
     />

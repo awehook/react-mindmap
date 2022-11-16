@@ -5,7 +5,6 @@ RUN npm config set registry https://registry.npm.taobao.org \
 WORKDIR /app
 COPY package.json . 
 RUN npm install
-RUN  sleep 100
 COPY . .
 RUN npm run build
 

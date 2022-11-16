@@ -18,7 +18,7 @@ export function ToolbarItemLayout(props) {
   const onClickSetLayout = layoutDir => e => {
     const { diagramProps } = props;
     const { controller } = diagramProps;
-    controller.run("setLayoutDir", { ...diagramProps, layoutDir });
+    controller.run("setLayoutDir", { ...diagramProps, model: controller.currentModel, layoutDir });
   };
 
   return (

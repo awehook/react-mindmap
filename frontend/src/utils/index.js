@@ -46,3 +46,11 @@ export function throttled(fn, delay = 5000) {
       }
   }
 }
+
+export function getNotesFromModel(model, defaultValue=[]) {
+  return model?.getIn(['extData', 'allnotes', 'notes'], defaultValue)
+}
+
+export function nonEmpty(obj) {
+  return (obj !== null) && (obj !== undefined);
+}

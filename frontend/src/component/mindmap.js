@@ -1,6 +1,6 @@
 import React from "react";
 import { Map as ImmutableMap } from "immutable";
-import { Diagram, Icon } from "@blink-mind/renderer-react";
+import { Icon } from "@blink-mind/renderer-react";
 import { Dialog, MenuItem  } from "@blueprintjs/core";
 import { OpType, getAllSubTopicKeys, ModelModifier } from "@blink-mind/core";
 import localforage from 'localforage';
@@ -11,7 +11,7 @@ import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import TopologyDiagramPlugin from "@blink-mind/plugin-topology-diagram";
 import { TopicReferencePlugin, SearchPlugin } from "@blink-mind/plugins";
 import { Toolbar } from "./toolbar/toolbar";
-import { generateSimpleModel, throttled } from "../utils";
+import { generateSimpleModel, getNotesFromModel } from "../utils";
 import "@blink-mind/renderer-react/lib/main.css";
 import debug from "debug";
 import { KeyboardHotKeyWidget } from './keyboardHotKeyWidget'
@@ -21,6 +21,7 @@ import { MyTopicWidget } from "./MyTopicWidget/index"
 import { Controller } from '@blink-mind/core';
 import memoizeOne from 'memoize-one';
 import { DefaultPlugin } from '@blink-mind/renderer-react';
+import { getAllNotes, getNotebookList, mergeNotes } from "../evernote/noteHelper";
 
 
 const log = debug("app");
@@ -34,11 +35,10 @@ let HotKeyName = {
 function op(opType, props) {
   const { topicKey, controller } = props;
   if (topicKey === undefined) {
-    props = { ...props, topicKey: controller.model.focusKey };
+    props = { ...props, topicKey: controller.currentModel.focusKey };
   }
   controller.run('operation', { ...props, opType });
 }
-
 
 const newOptions = {
     ADD_NOTE_RELATION: (props) => {
@@ -288,9 +288,29 @@ function CounterPlugin() {
   }
 }
 
+
+function CustomizeJsonSerializerPlugin()
+{
+  return {
+    deserializeExtData: (props, next) => {
+      const { extData } = props;
+      if (extData?.evernote) {
+          extData.evernote = new ImmutableMap(extData.evernote);
+      }
+      if (extData?.allnotes?.notebooks) {
+          extData.allnotes.notebooks = new ImmutableMap(extData.allnotes.notebooks);
+      }
+      props.extData = extData;
+      const ret = next();
+      return ret;
+    }
+  }
+}
+
 const plugins = [
   // RichTextEditorPlugin(),
   DebugPlugin(),
+  CustomizeJsonSerializerPlugin(),
   AddNewOperations(),
   FixCollapseAllPlugin(),
   CounterPlugin(),
@@ -302,6 +322,14 @@ const plugins = [
   TopologyDiagramPlugin(),
   JsonSerializerPlugin()
 ];
+
+class MyController extends Controller {
+  // override the change interface of Controller to first change currentModel and then call onChange
+  change(model, callback) {
+    this.currentModel = model;
+    this.onChange(model, callback);
+  }
+}
 
 export class Mindmap extends React.Component {
   constructor(props) {
@@ -317,28 +345,26 @@ export class Mindmap extends React.Component {
         minimal:true
       }
     }
-    this.controller = this.resolveController(plugins, DefaultPlugin)
+    this.controller = this.resolveController(plugins, DefaultPlugin);
   }
-  controller;
 
   openNewModel = (newModel) => {
     const props = this.controller.run('getDiagramProps');
-    const { model, controller } = props;
-    controller.run('deleteRefKey', {
+    const { model, getRef } = props;
+    this.controller.run('deleteRefKey', {
       ...props,
       topicKey: model.rootTopicKey
     });
-    controller.run('operation', {
+    this.controller.run('operation', {
       ...props,
       opType: OpType.EXPAND_TO,
       topicKey: newModel.focusKey,
       model: newModel,
       callback: () => {
-        const props = this.getDiagramProps();
-        const { model } = props;
-        controller.run('moveTopicToCenter', {
-          ...props,
-          topicKey: model.focusKey
+        this.controller.run('moveTopicToCenter', {
+          getRef,
+          model: newModel,
+          topicKey: newModel.focusKey
         });
       }
     });
@@ -346,11 +372,12 @@ export class Mindmap extends React.Component {
 
   resolveController = memoizeOne((plugins = [], TheDefaultPlugin) => {
     const defaultPlugin = TheDefaultPlugin();
-    return new Controller({
+    return new MyController({
       plugins: [plugins, defaultPlugin],
       construct: false,
       onChange: this.onChange
     });
+    // this.controller.currentModel = this.state.model;
     // this.controller.run('onConstruct');
   });
 
@@ -363,17 +390,6 @@ export class Mindmap extends React.Component {
     const props = this.controller.run('getDiagramProps')
     this.controller.run("redo", props);
   };
-
-  renderDiagram() {
-    console.log("renderDiagram")
-    return (
-      <Diagram
-        model={this.state.model}
-        onChange={this.onChange}
-        plugins={plugins}
-      />
-    );
-  }
 
   getDiagramProps() {
     return this.controller.run("getDiagramProps");
@@ -417,16 +433,14 @@ export class Mindmap extends React.Component {
   }
 
   saveCache = (callback=() => {}) => {
-      if (this.state && this.state.model) {
-          const serializedModel = this.controller.run('serializeModel', { controller: this.controller, model: this.state.model });
+      const { controller, state: { model } } = this;
+      console.log(`Auto-Save at ${new Date()}`, { this: this, controller, model })
+      if (model) {
+          const serializedModel = controller.run('serializeModel', { controller, model });
           localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
-          console.log(`Auto-Save at ${new Date()}`)
           callback()
       }
   }
-
-  // autoSave per 60s
-  autoSaveModel = () => setInterval(this.saveCache, 60000)
 
   async componentDidMount() {
       console.log('componentDidMount')
@@ -434,9 +448,6 @@ export class Mindmap extends React.Component {
         if (err === null && value) {
             const { controller } = this;
             let obj = JSON.parse(value);
-            if (obj && obj.extData && obj.extData.hasOwnProperty('evernote')) {
-                obj.extData.evernote = new ImmutableMap(obj.extData.evernote);
-            }
             const model = controller.run("deserializeModel", { controller, obj });
             const nTopics = controller.run("getAllTopicCount", { model })
             if (model && nTopics) { 
@@ -444,17 +455,74 @@ export class Mindmap extends React.Component {
                 isOpen: true,
                 children: <>
                   { `Detect previously cached graph containing ${nTopics} topics. Do you want to load your cached graph?` }
-                  <Button onClick={() => this.setState({ model, loadFromCached: true, initialized: true, dialog: {isOpen: false}}) }>Yes</Button>
-                  <Button onClick={() => this.setState({ initialized: true, dialog: {isOpen: false} }) }>No</Button> 
+                  <Button onClick={() => {
+                    this.controller.change(model) // model should be updated by controller
+                    this.setState({ loadFromCached: true, initialized: true, dialog: {isOpen: false}}, () => this.startRegularJob()) 
+                  }}>Yes</Button>
+                  <Button onClick={() => this.setState({ initialized: true, dialog: {isOpen: false} }, () => this.startRegularJob()) }>No</Button> 
                 </>
               }})
               return ;
             }; 
+        } else {
+          this.setState({ initialized: true }, () => this.startRegularJob());
         }
-        this.setState({ initialized: true });
       })
-      this.autoSaveModel();
   }
+
+  startRegularJob () {
+    this.autoSaveModel()
+    this.updateNotebooks()
+    this.updateNotes()
+  }
+
+  // autoSave per 60s
+  autoSaveModel = () => setInterval(this.saveCache, 60000)
+
+  offset = 500
+
+  // update notes regularly
+  updateNotes = () => { 
+        setInterval(
+            () => {
+                const { controller } = this;
+                console.log(`regularly updating notes`)
+                let cur = controller.currentModel.getIn(['extData', 'allnotes', 'cur'], 0);
+                if (cur > 10000) { cur = 0; }
+                getAllNotes(cur, cur + this.offset, false, (xhr) => {
+                    console.log(xhr.responseText); // 请求成功
+                    const newNotes = JSON.parse(xhr.responseText)?.['notes'] ?? []; 
+                    let newModel = controller.currentModel.updateIn(['extData', 'allnotes', 'notes'], notes => mergeNotes(notes ?? [], newNotes))
+                    newModel = newModel.updateIn(['extData', 'allnotes', 'cur'], () => cur + this.offset)
+                    controller.change(newModel, () => {
+                        console.log(`regularly updated ${this.offset} notes`)
+                    })
+                }, (xhr) => {
+                    console.log(`regularly updated 0 note because query failed`)
+                })
+            }
+          , 60000)
+   }
+
+  // update notebooks regularly
+  updateNotebooks = () => { 
+        setInterval(
+            () => {
+                const { controller } = this;
+                console.log(`regularly updating notebooks`)
+                getNotebookList(false, (xhr) => {
+                    console.log(xhr.responseText); // 请求成功
+                    const data = JSON.parse(xhr.responseText);
+                    let newModel = controller.currentModel.updateIn(['extData', 'allnotes', 'notebooks'], notebooks => new Map(data['notebooks'].map(item => [item.guid, item.name])))
+                    controller.change(newModel, () => {})
+                    console.log(`regularly updated ${data['notebooks'].length} notebooks`)
+                }, (xhr) => {
+                    console.log(`regularly updated 0 notebooks because query failed`)
+                })
+            }
+          , 60000)
+    }
+
 
   onLoadFromCached = () => {
     const nTopics = this.controller.run("getAllTopicCount", { model: this.state.model });
@@ -476,7 +544,11 @@ export class Mindmap extends React.Component {
       }
       const { controller } = this;
       if (controller) {
-          console.log("componentDidUpdate:", { state: this.state})
+          console.log("componentDidUpdate:", { 
+            state: this.state, 
+            allnotes: getNotesFromModel(this.state.model, []),
+            current_allnotes: getNotesFromModel(this.controller.currentModel, [])
+          })
           // console.log((controller.run('getUndoRedoStack')))
           console.log({ 
               redo: (controller.run('getUndoRedoStack')).redoStack.size, 
@@ -490,18 +562,11 @@ export class Mindmap extends React.Component {
   };
 
   render() {
-    const diagramProps = {
-      plugins: plugins,
-      model: this.state.model,
-      controller: this.controller
-    };
-    console.log("render-test:", {state: this.state})
-    return <div>
-        {
+    return <div> {
           <div className="mindmap" style={{visibility: this.state.initialized ? 'visible' : 'hidden'}}>
-            <Dialog {...this.state.dialog}></Dialog>
+            <Dialog { ...this.state.dialog }></Dialog>
             { this.getDiagramProps() && this.renderToolbar()}
-            { this.controller.run('renderDiagram', diagramProps) }
+            { this.controller.run('renderDiagram', { model: this.state.model, controller: this.controller }) }
             <div className="bm-left-conner">
               { this.renderCounter() }
               { this.renderCacheButton() }

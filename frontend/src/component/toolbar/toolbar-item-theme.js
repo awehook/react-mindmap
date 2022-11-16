@@ -12,7 +12,7 @@ export function ToolbarItemTheme(props) {
   const onClickSetTheme = themeKey => e => {
     const { diagramProps } = props;
     const { controller } = diagramProps;
-    controller.run("setTheme", { ...diagramProps, themeKey });
+    controller.run("setTheme", { ...diagramProps, model: controller.currentModel, themeKey });
   };
   const themes = [
     ["default", defaultThemeImg],

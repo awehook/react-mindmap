@@ -7,14 +7,14 @@ import { downloadFile } from "../../utils";
 export function ToolbarItemExport(props) {
   const onClickExportJson = e => {
     const { diagramProps } = props;
-    const { controller, model } = diagramProps;
+    const { controller } = diagramProps;
 
-    const json = controller.run("serializeModel", diagramProps);
+    const json = controller.run("serializeModel", { ...diagramProps, model: controller.currentModel }, );
     const jsonStr = JSON.stringify(json);
     const url = `data:text/plain,${encodeURIComponent(jsonStr)}`;
     const title = controller.run("getTopicTitle", {
       ...diagramProps,
-      topicKey: model.rootTopicKey
+      topicKey: controller.currentModel.rootTopicKey
     });
     downloadFile(url, `${title}.blinkmind`);
   };
