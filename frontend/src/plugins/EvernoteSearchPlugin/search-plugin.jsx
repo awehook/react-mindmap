@@ -3,7 +3,7 @@ import * as React from 'react';
 import { SearchPanel } from './search-panel';
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, HOT_KEY_NAME_SEARCH } from './utils';
 
-export function mySearchPlugin() {
+export function EvernoteSearchPlugin() {
   let searchWord;
   const setSearchWorld = s => {
     searchWord = s;
