@@ -1,7 +1,8 @@
+import { getEnv } from "../utils";
 import EvernoteClient from "./client";
 
 const evernoteCient = new EvernoteClient(
-  (process.env.NODE_ENV === 'production' ?  window.__env__?.REACT_APP_EVERNOTE_API_ENDPOINT: process.env.REACT_APP_EVERNOTE_API_ENDPOINT) ?? 'http://localhost:5000', 
+  getEnv('REACT_APP_EVERNOTE_API_ENDPOINT', 'http://localhost:5000')
 );
 
 export const getDeleteNotes = (sync=true, successCallback=null, failCallback=null) => {

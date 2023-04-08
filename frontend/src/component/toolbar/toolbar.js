@@ -7,6 +7,7 @@ import { ToolbarItemLayout } from "./toolbar-item-layout";
 import { ToolbarItemTheme } from "./toolbar-item-theme";
 import { ToolbarItemExport } from "./toolbar-item-export";
 import { ToolbarItemSearch } from "./toolbar-item-search";
+import { ToolbarItemSync } from "./toolbar-item-sync";
 
 // import debug from "debug";
 // const log = debug("app");
@@ -21,6 +22,7 @@ export class Toolbar extends React.PureComponent {
       <div className="bm-toolbar">
         <ToolbarItemOpen {...props} />
         <ToolbarItemExport {...props} />
+        <ToolbarItemSync {...props} />
         <ToolbarItemTheme {...props} />
         <ToolbarItemLayout {...props} />
         <ToolbarItemSearch {...props} />

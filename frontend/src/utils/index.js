@@ -54,3 +54,8 @@ export function getNotesFromModel(model, defaultValue=[]) {
 export function nonEmpty(obj) {
   return (obj !== null) && (obj !== undefined);
 }
+
+export function getEnv(key, defaultValue=null) {
+  return (process.env.NODE_ENV === 'production' ? window.__env__[key]
+                                                : process.env[key]) ?? defaultValue;
+}

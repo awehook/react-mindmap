@@ -1,12 +1,20 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "pwa-chrome",
-        "request": "launch",
-        "name": "Launch chrome against localhost",
-        "url": "http://localhost:4444",
-        "webRoot": "${workspaceFolder}"
-      }
-    ]
-  }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "Launch chrome against localhost",
+      "url": "http://localhost:4444",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

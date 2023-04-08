@@ -5,7 +5,7 @@ import { Dialog, MenuItem  } from "@blueprintjs/core";
 import { OpType, getAllSubTopicKeys, ModelModifier } from "@blink-mind/core";
 import localforage from 'localforage';
 import { Button, Classes } from "@blueprintjs/core";
-import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
+// import RichTextEditorPlugin from "@blink-mind/plugin-rich-text-editor";
 import { JsonSerializerPlugin } from "@blink-mind/plugin-json-serializer";
 import { ThemeSelectorPlugin } from "@blink-mind/plugin-theme-selector";
 import TopologyDiagramPlugin from "@blink-mind/plugin-topology-diagram";
@@ -288,7 +288,6 @@ function CounterPlugin() {
   }
 }
 
-
 function CustomizeJsonSerializerPlugin()
 {
   return {
@@ -320,7 +319,7 @@ const plugins = [
   SearchPlugin(),
   mySearchPlugin(),
   TopologyDiagramPlugin(),
-  JsonSerializerPlugin()
+  JsonSerializerPlugin(),
 ];
 
 class MyController extends Controller {
@@ -370,6 +369,18 @@ export class Mindmap extends React.Component {
     });
   }
 
+  openDialog = (dialog) => {
+    this.setDialog(dialog)
+  }
+
+  closeDialog = () => {
+    this.setDialog({ isOpen: false })
+  }
+
+  setDialog = (dialog) => {
+    this.setState({ dialog })
+  }
+
   resolveController = memoizeOne((plugins = [], TheDefaultPlugin) => {
     const defaultPlugin = TheDefaultPlugin();
     return new MyController({
@@ -403,6 +414,8 @@ export class Mindmap extends React.Component {
     const toolbarProps = {
       diagramProps: diagramProps,
       openNewModel: this.openNewModel,
+      openDialog: this.openDialog,
+      closeDialog: this.closeDialog,
       onClickUndo: this.onClickUndo,
       onClickRedo: this.onClickRedo,
       canUndo,
@@ -451,7 +464,7 @@ export class Mindmap extends React.Component {
             const model = controller.run("deserializeModel", { controller, obj });
             const nTopics = controller.run("getAllTopicCount", { model })
             if (model && nTopics) { 
-              this.setState({ dialog: {
+              this.openDialog({
                 isOpen: true,
                 children: <>
                   { `Detect previously cached graph containing ${nTopics} topics. Do you want to load your cached graph?` }
@@ -461,7 +474,7 @@ export class Mindmap extends React.Component {
                   }}>Yes</Button>
                   <Button onClick={() => this.setState({ initialized: true, dialog: {isOpen: false} }, () => this.startRegularJob()) }>No</Button> 
                 </>
-              }})
+              })
               return ;
             }; 
         } else {
@@ -526,7 +539,7 @@ export class Mindmap extends React.Component {
 
   onLoadFromCached = () => {
     const nTopics = this.controller.run("getAllTopicCount", { model: this.state.model });
-    this.setState({ dialog: {
+    this.openDialog({
       isOpen: true,
       children: <>
         <div className={Classes.DIALOG_BODY}>
@@ -534,7 +547,7 @@ export class Mindmap extends React.Component {
         </div>
         <Button onClick={() => this.setState({ loadFromCached: null, dialog: {isOpen: false} }) }>OK</Button> 
       </>
-    }})
+    })
   }
 
   // debug

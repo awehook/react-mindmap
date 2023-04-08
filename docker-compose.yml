@@ -1,4 +1,4 @@
-version: "3.9.1"
+version: "0.0.0"
 services:
   backend: 
     build: backend
@@ -12,3 +12,11 @@ services:
       - "8080:8080"
     environment:
       EVERNOTE_API_ENDPOINT: "${EVERNOTE_API_ENDPOINT}"
+      DB_CONNECTION_NAME: "${DB_CONNECTION_NAME}"
+      DB_ENDPOINT: "${DB_ENDPOINT}"
+  mysql:
+    image: armv7/armhf-mysql:5.5.44
+    volumes:
+      - ./data/mysql/datadir:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
