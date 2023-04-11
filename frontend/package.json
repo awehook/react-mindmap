@@ -92,7 +92,7 @@
     "workbox-webpack-plugin": "4.3.1"
   },
   "scripts": {
-    "start": "export PORT=4444 && node scripts/start.js",
+    "start": "cross-env PORT=4444 node scripts/start.js",
     "build": "cross-env NODE_ENV=production node scripts/build.js",
     "build-dev": "cross-env NODE_ENV=development node scripts/build.js",
     "debug": "cross-env NODE_ENV=development node --inspect-brk scripts/build.js",
