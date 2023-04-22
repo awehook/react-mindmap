@@ -2,6 +2,8 @@ import React from "react";
 import debug from 'debug';
 import { MenuItem } from "@blueprintjs/core";
 import { getAllSubTopicKeys } from "@blink-mind/core";
+import { Icon } from "../../icon";
+import "../../icon/index.css";
 
 const log = debug('app:plugin:CopyPastePlugin')
 
@@ -119,15 +121,16 @@ export function CopyPastePlugin() {
             })
         }
         const copyNodeItem = <MenuItem
-              // icon={Icon(item.icon)}
-              key={"cutNode"}
-              text={ "CutNote" }
+              icon={ Icon("edit-cut") }
+              key={"cut nodes"}
+              text={ "cut notes" }
               labelElement={<kbd>{ "Ctrl + x" }</kbd>}
               onClick={onClickCutItem}
             />
         const pasteNodeItem = <MenuItem
-              key={"pasteNode"}
-              text={ "PasteNode" }
+              icon={Icon("paste")}
+              key={"paste nodes"}
+              text={ "paste notes" }
               labelElement={<kbd>{ "Ctrl + v" }</kbd>}
               onClick={onClickPasteItem}
             />

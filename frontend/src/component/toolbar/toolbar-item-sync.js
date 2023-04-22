@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { iconClassName } from "@blink-mind/renderer-react";
+import { iconClassName } from "../../icon";
 import { Menu, MenuItem, Popover } from "@blueprintjs/core";
 import React from "react";
 import DbConnection from "../../db/db"
@@ -87,9 +87,9 @@ export function ToolbarItemSync(props) {
   }
 
   return (
-    <div className={cx("bm-toolbar-item", iconClassName("export"))}>
+    <div className={cx("bm-toolbar-item", iconClassName("loop2"))}>
       <Popover enforceFocus={false}>
-        <div className="bm-toolbar-popover-target" />
+        <div className="bm-toolbar-sync" />
         <Menu>
           <MenuItem text="Pull" onClick={ onClickPull } />
           <MenuItem text="Push" onClick={ onClickPush } />

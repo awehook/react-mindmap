@@ -1,4 +1,3 @@
-import { Icon } from "@blink-mind/renderer-react";
 import { MenuItem } from "@blueprintjs/core";
 import { Map as ImmutableMap } from "immutable";
 import React from 'react';
@@ -6,6 +5,8 @@ import { MyTopicWidget } from "../../component/MyTopicWidget";
 import { NEW_OPERATION_OPTIONS } from '../AddNewOperationsPlugin';
 import { KeyboardHotKeyWidget } from '../../component/keyboardHotKeyWidget';
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH } from "../EvernoteSearchPlugin";
+import { Icon } from "../../icon";
+import '../../icon/index.css';
 
 let HotKeyName = {
     ASSOCIATE_NOTE: 'ASSOCIATE_NOTE',
@@ -108,7 +109,7 @@ export function HotKeyPlugin() {
               if (item.viewMode && !item.viewMode.includes(viewMode)) return null;
               return (
                 <MenuItem
-                  icon={Icon(item.icon)}
+                  icon={ Icon("evernote") }
                   key={item.label}
                   text={item.label}
                   labelElement={<KeyboardHotKeyWidget hotkeys={item.shortcut} />}

@@ -13,9 +13,9 @@ export function EvernoteSearchPlugin() {
       const { controller, model } = props;
       const hotKeys = next();
 
-      hotKeys.globalHotKeys.set(HOT_KEY_NAME_SEARCH, {
+      hotKeys.topicHotKeys.set(HOT_KEY_NAME_SEARCH, {
         label: 'search',
-        combo: 'ctrl + f',
+        combo: 'mod + f',
         onKeyDown: () => {
           controller.run('operation', {
             ...props,

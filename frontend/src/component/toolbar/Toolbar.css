@@ -11,6 +11,7 @@
   cursor: pointer;
   font-size: 24px;
   display: inline-block;
+  line-height: 100%;
 }
 
 .bm-toolbar-item-disabled {
