@@ -1,6 +1,7 @@
 import { OpType, getAllSubTopicKeys } from "@blink-mind/core";
 import { Map as ImmutableMap } from "immutable";
 import { FOCUS_MODE_SEARCH_NOTE_TO_ATTACH } from "../EvernoteSearchPlugin";
+import { getEnv } from "../../utils";
 
 export const NEW_OPERATION_OPTIONS = {
     ADD_NOTE_RELATION: (props) => {
@@ -30,8 +31,9 @@ export const NEW_OPERATION_OPTIONS = {
         const { topicKey, controller } = props;
         const note = controller.currentModel.getIn(["extData", "evernote", topicKey]);
         if (note !== undefined) {
-            // const url = `https://app.yinxiang.com/shard/s54/nl/22483756/${note.guid}/`
-            const url = `evernote:///view/22483756/s54/${note.guid}/${note.guid}/`
+            const shardId = getEnv("REACT_APP_EVERNOTE_SHARD_ID")
+            const userId = getEnv("REACT_APP_EVERNOTE_USER_ID")
+            const url = `evernote:///view/${userId}/${shardId}/${note.guid}/${note.guid}/`
             window.open(url, '_blank').focus();
         } else {
             alert(`Topic doesn't have an associated note`);
