@@ -2,8 +2,7 @@
     // 默认在Python文件保存时进行静态检查
     "python.linting.enabled": true,
     "python.linting.mypyEnabled": true,
-    "python.linting.pylintEnabled": false,
-    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintEnabled": true,
     "python.linting.mypyArgs": [
         "--ignore-missing-imports",
         "--show-column-numbers",

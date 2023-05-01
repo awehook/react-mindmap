@@ -1,4 +1,1 @@
-docker build -t test . \
-    --build-arg "HTTP_PROXY=http://example.com:9001/" \
-    --build-arg "HTTPS_PROXY=http://example.com:9001/" \
-    --build-arg "NO_PROXY=localhost,127.0.0.1,example.com" 
+docker buildx build . --platform linux/amd64,linux/arm/v7,linux/arm64 -t host.docker.internal:4231/react-mindmap-backend --output=type=image,push=true,registry.insecure=true

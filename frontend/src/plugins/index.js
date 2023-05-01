@@ -8,3 +8,4 @@ export * from './EvernoteSearchPlugin';
 export * from './NewSearchPlugin';
 export * from './StandardDebugPlugin';
 export * from './CopyPastePlugin'
+export * from './CreateJupyterNotebookPlugin'

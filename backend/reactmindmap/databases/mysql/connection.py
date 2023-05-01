@@ -2,7 +2,7 @@ import pymysql
 from typing import Optional
 from pymysql.cursors import DictCursor
 from datetime import datetime
-from app.databases.connection import DbConnection
+from reactmindmap.databases.connection import DbConnection
 
 class MysqlConnection(DbConnection):
 

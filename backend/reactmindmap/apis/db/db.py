@@ -1,8 +1,8 @@
 from flask import request
 from typing import cast
-from app.config import app
-from app.connections.factory import DbConnectionFactory
-from app.utils.type_utils import nn
+from reactmindmap.app import app
+from reactmindmap.connections.factory import DbConnectionFactory
+from reactmindmap.utils.type_utils import nn
 
 @app.route('/api/db/<dbconnectionName>/pull')
 def pull(dbconnectionName: str):

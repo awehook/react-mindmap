@@ -22,7 +22,8 @@ import {
   FixCollapseAllPlugin,
   HotKeyPlugin,
   NewSearchPlugin,
-  CopyPastePlugin
+  CopyPastePlugin,
+  CreateJupyterNotebookPlugin
 } from '../plugins';
 import { generateSimpleModel, getNotesFromModel } from "../utils";
 import { Toolbar } from "./toolbar/toolbar";
@@ -40,6 +41,7 @@ const plugins = [
   AddNewOperationsPlugin(),
   FixCollapseAllPlugin(),
   CounterPlugin(),
+  CreateJupyterNotebookPlugin(),
   HotKeyPlugin(),
   ThemeSelectorPlugin(),
   TopicReferencePlugin(),
@@ -47,7 +49,7 @@ const plugins = [
   EvernoteSearchPlugin(),
   TopologyDiagramPlugin(),
   JsonSerializerPlugin(),
-  CopyPastePlugin()
+  CopyPastePlugin(),
 ];
 
 class MyController extends Controller {

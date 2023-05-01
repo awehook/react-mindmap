@@ -1,5 +1,5 @@
-from app.connections.config import CONFIG
-from app.databases.connection import DbConnection
+from reactmindmap.connections.config import CONFIG
+from reactmindmap.databases.connection import DbConnection
 
 class DbConnectionFactory:
 

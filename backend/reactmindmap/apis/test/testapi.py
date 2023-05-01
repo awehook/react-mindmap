@@ -1,5 +1,5 @@
 import flask
-from app.config import app
+from reactmindmap.app import app
 
 @app.route('/api/test')
 def test():

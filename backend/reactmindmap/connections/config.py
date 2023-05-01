@@ -1,4 +1,4 @@
-from app.databases.mysql.connection import MysqlConnection
+from reactmindmap.databases.mysql.connection import MysqlConnection
 
 CONFIG  = {
     "mysql": {

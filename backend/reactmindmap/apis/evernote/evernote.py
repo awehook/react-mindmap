@@ -5,7 +5,7 @@ from flask import request
 from evernote.api.client import EvernoteClient
 from evernote.edam.notestore import NoteStore
 from typing import Optional
-from app.config import app
+from reactmindmap.app import app
 
 def initializeClient() -> Optional[EvernoteClient]:
     evernote_token = os.environ.get('EVERNOTE_TOKEN', None)

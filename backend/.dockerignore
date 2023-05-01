@@ -1,0 +1,5 @@
+*.egg-info
+.venv
+README.md
+requirements-dev.txt
+build.sh
