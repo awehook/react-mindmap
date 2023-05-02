@@ -4,24 +4,36 @@ import {
 } from './setting-item'
 import { SettingRow } from './styled'
 import { Checkbox } from '@blueprintjs/core';
-import React, { useState } from 'react';
+import debug from 'debug';
+import React, { useEffect, useMemo, useState } from 'react';
 
-const _debugNameSpaces = [
+let log = debug('plugin:StandardDebugPlugin')
+
+const builtInDebugNameSpaces = [
   "app",
-  "app:plugin",
+  "plugin:CreateJupyterNotebookPlugin",
+  "plugin:StandardDebugPlugin",
+  "plugin:DebugPlugin"
 ];
 
 if (!localStorage.allDebugNS)
-  localStorage.allDebugNS = _debugNameSpaces.join(',');
+  localStorage.allDebugNS = builtInDebugNameSpaces.join(',');
 
 export function DebugNamespaceWidget(props) {
-  const [debugStr, setDebugStr] = useState(localStorage.debug || '');
+  const [debugNamespaces, setDebugNamespaces] = useState(localStorage?.debug ? localStorage.debug.split(','): []);
   const [allDebugNS, setAllDebugNS] = useState(
     localStorage.allDebugNS.split(',').sort()
   );
   const [nsName, setNsName] = useState('');
+  const debugStr = useMemo(() => debugNamespaces.join(','), [debugNamespaces])
 
-  const setDebugNS = nsArray => {};
+  useEffect(
+    () => { 
+      log("debugStr to enable:", debugStr)
+      debug.enable(debugStr) 
+    },
+    [debugStr]
+  )
 
   const nameProps = {
     title: 'namespace:',
@@ -36,7 +48,13 @@ export function DebugNamespaceWidget(props) {
   const nsNameInput = <SettingItemInput {...nameProps} />;
   const addNsBtnProps = {
     title: 'Add Or Delete Namespace',
-    onClick(e) {
+    onClick:  (e) => {
+      if (!nsName)
+      {
+        log("input value:", nsName)
+        alert("Can't add a null or empty namespace")
+        return ;
+      }
       let _allDebugNS;
       if (allDebugNS.includes(nsName)) {
         _allDebugNS = allDebugNS.filter(i => i !== nsName);
@@ -49,30 +67,29 @@ export function DebugNamespaceWidget(props) {
     }
   };
   const addNsBtn = <SettingItemButton {...addNsBtnProps} />;
+  const checkBoxes = allDebugNS.map(item => {
+    const cprops = {
+      key: item,
+      label: item,
+      checked: debugNamespaces.includes(item),
+      onChange: e => {
+        let newDebugNamespaces = [...debugNamespaces];
+        if (debugNamespaces.includes(item)) {
+          // remove item
+          newDebugNamespaces = newDebugNamespaces.filter(i => i !== item);
+        } else {
+          // add item
+          newDebugNamespaces.push(item);
+        }
+        setDebugNamespaces(newDebugNamespaces)
+      }
+    };
+    return <Checkbox {...cprops} />;
+  });
 
   return (
     <div>
-      <div>
-        {allDebugNS.map(item => {
-          const cprops = {
-            key: item,
-            label: item,
-            checked: debugStr.split(',').includes(item),
-            onChange: e => {
-              let checkedItems = debugStr.split(',').filter(i => i !== '');
-              if (checkedItems.includes(item)) {
-                checkedItems = checkedItems.filter(i => i !== item);
-              } else {
-                checkedItems.push(item);
-              }
-              const newDebugStr = checkedItems.join(',');
-              setDebugStr(newDebugStr);
-              localStorage.debug = newDebugStr;
-            }
-          };
-          return <Checkbox {...cprops} />;
-        })}
-      </div>
+      <div> {checkBoxes} </div>
       <SettingRow>
         {nsNameInput}
         {addNsBtn}

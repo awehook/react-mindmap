@@ -20,6 +20,7 @@
     "classnames": "^2.2.6",
     "cross-env": "^6.0.3",
     "date-fns": "^2.29.3",
+    "debug": "^4.3.4",
     "fuzzysort": "^2.0.1",
     "html-react-parser": "^2.0.0",
     "immutable": "^4.1.0",

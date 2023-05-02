@@ -1,6 +1,6 @@
 import debug from "debug";
 
-const log = debug("app:plugin:DebugPlugin")
+const log = debug("plugin:DebugPlugin")
 
 export function DebugPlugin()
 {
