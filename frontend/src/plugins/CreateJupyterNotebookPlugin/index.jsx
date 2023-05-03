@@ -31,6 +31,12 @@ export const FocusMode = {
     CONFIRM_CREATE_JUPYTER_NOTEBOOK: "CONFIRM_CREATE_JUPYTER_NOTEBOOK"
 }
 
+const openJupyterNotebookLink = (path) => {
+    const url = jupyterClient.getActualUrl(path)
+    log(`Opening ${url}`)
+    window.open(url, '_blank').focus()
+}
+
 const renderModalRemovingJuyterNotebook = (props) => {
     const { controller } = props;
     const onClickYes = () => {
@@ -139,9 +145,9 @@ const createJupyterNote = (props) => {
                     jupyter_notebook_path: jupyter_notebook_path,
                     // hack: if no use controller.currentModel, the topic may not correctly be focused
                     model: controller.currentModel,
-                    opType: OpType.CREATE_ASSOCIATED_JUPYTER_NOTE
+                    opType: OpType.CREATE_ASSOCIATED_JUPYTER_NOTE,
+                    callback: () => openJupyterNotebookLink(jupyter_notebook_path)
                 })
-
                 if (controller.currentModel.focusMode === FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK)
                 {
                     controller.run("operation", {
@@ -211,9 +217,7 @@ export function CreateJupyterNotebookPlugin()
             const jupyter_notebook_path = model.getIn(['extData', 'jupyter', topicKey, "path"])
             if (jupyter_notebook_path)
             {
-                const url = jupyterClient.getActualUrl(jupyter_notebook_path)
-                log(`Opening ${url}`)
-                window.open(url, '_blank').focus()
+                openJupyterNotebookLink(jupyter_notebook_path)
             }
             else 
             {
