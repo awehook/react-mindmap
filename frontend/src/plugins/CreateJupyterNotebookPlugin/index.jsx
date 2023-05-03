@@ -1,6 +1,6 @@
 import { BlockType, OpType as StandardOpType, FocusMode as StandardFocusMode } from '@blink-mind/core';
-import { Button, Dialog, MenuDivider, MenuItem } from '@blueprintjs/core';
-import { Map as ImmutableMap } from 'immutable';
+import { Button, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { Map as ImmutableMap, } from 'immutable';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import '../../icon/index.css';
@@ -56,16 +56,16 @@ const renderModalRemovingJuyterNotebook = (props) => {
         })
     }
 
-    const dialogProps = {
-        key: "renderModalRemovingJuyterNotebook",
-        isOpen: true,
-        children: <>
-            { "Do you want to remove the attached jupyter note?" }
-            <Button onClick={ onClickYes }>Yes</Button>
-            <Button onClick={ onClickNo }>No</Button> 
-        </>
-    }
-    return <Dialog {...dialogProps} />
+    return getDialog(
+        {
+            key: "renderModalRemovingJuyterNotebook",
+            title: "Do you want to remove the attached jupyter note?",
+            buttons: [
+                <Button onClick={ onClickYes }>Yes</Button>,
+                <Button onClick={ onClickNo }>No</Button> 
+            ]
+        }
+    );
 }
 
 const renderModalNotifyRemovedJupyterNoteBook = (props) => {
@@ -84,16 +84,13 @@ const renderModalNotifyRemovedJupyterNoteBook = (props) => {
             ]
         })
     }
-
-    const dialogProps = {
-        key: "renderModalNotifyRemovedJupyterNote",
-        isOpen: true,
-        children: <>
-            { "The jupyter note has been remove!" }
-            <Button onClick={ onClickYes }>Yes</Button>
-        </>
-    }
-    return <Dialog {...dialogProps} />
+    return getDialog(
+        {
+            key:  "renderModalNotifyRemovedJupyterNote",
+            title: "The jupyter note has been remove!" ,
+            buttons: [<Button onClick={ onClickYes }>Yes</Button>]
+        }
+    )
 }
 
 const renderModalConfirmCreateJupyterNotebook = (props) => {
