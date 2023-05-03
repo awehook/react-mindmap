@@ -103,13 +103,11 @@ const focusModeCallbacks = new Map([
     [FocusMode.NOTIFY_REMOVED_JUPYTER_NOTE, renderModalNotifyRemovedJupyterNote]
 ])
 
-const getNoteText = (controller, model, topicKey) => {
+const getNoteText = ({model, topicKey}) => {
     const topic = model.getTopic(topicKey);
     const block = topic.getBlock(BlockType.CONTENT).block;
-    const noteTitle = controller.run('serializeBlockData', { controller, model, block });
-    return noteTitle;
+    return block.data;
 }
-
 
 export function CreateJupyterNotebookPlugin()
 {
@@ -158,7 +156,7 @@ export function CreateJupyterNotebookPlugin()
             }
             const jupyter_notebook_id = uuidv4()
             const jupyter_notebook_path = jupyter_notebook_id + '/' + ensureSuffix(jupyter_notebook_id, ".ipynb")
-            const text = getNoteText(controller, model, topicKey)
+            const text = getNoteText({model, topicKey})
             jupyterClient.createNote(jupyter_notebook_path, text)
                 .then(isSuccess => {
                     if (isSuccess)
