@@ -250,8 +250,8 @@ export function CreateJupyterNotebookPlugin()
         const res = next();
         if (!res)
             return false;
-        const { model, focusMode } = props;
-        if (FocusMode.hasOwnProperty(model.focusMode) || FocusMode.hasOwnProperty(focusMode))
+        const { model } = props;
+        if (FocusMode.hasOwnProperty(model.focusMode))
             return false;
         return res;
     },
