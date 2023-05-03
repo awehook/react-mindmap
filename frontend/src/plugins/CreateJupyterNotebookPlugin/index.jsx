@@ -8,20 +8,27 @@ import { JUPYTER_BASE_URL, JUPYTER_CLIENT_ENDPOINT, JUPYTER_CLIENT_TYPE, JUPYTER
 import { JupyterClient } from './jupyter';
 import { log } from './logger';
 import { ensureSuffix } from './utils';
+import { getDialog } from './dialog';
+
+let jupyterClient = new JupyterClient(JUPYTER_CLIENT_ENDPOINT, {
+    jupyterBaseUrl: JUPYTER_BASE_URL,
+    rootFolder: JUPYTER_ROOT_FOLDER,
+    clientType: JUPYTER_CLIENT_TYPE
+});
 
 const getIcon = () => {
     return <div className="icon-jupyter"></div>
 }
 
 export const OpType = {
-    CREATE_ASSOCIATED_JUPYTER_NOTE: 'CREATE_ASSOCIATED_JUPYTER_NOTE',
+    CREATE_ASSOCIATED_JUPYTER_NOTE: "CREATE_ASSOCIATED_JUPYTER_NOTE",
     DELETE_ASSOCIATED_JUPYTER_NOTE: "DELETE_ASSOCIATED_JUPYTER_NOTE",
-    NOTIFY_REMOVED_JUPYTER_NOTE: "NOTIFY_REMOVED_JUPYTER_NOTE"
 }
 
 export const FocusMode = {
     REMOVING_JUPYTER_NOTEBOOK: "REMOVING_JUPYTER_NOTEBOOK",
-    NOTIFY_REMOVED_JUPYTER_NOTE: "NOTIFY_REMOVED_JUPYTER_NOTE"
+    NOTIFY_REMOVED_JUPYTER_NOTEBOOK: "NOTIFY_REMOVED_JUPYTER_NOTEBOOK",
+    CONFIRM_CREATE_JUPYTER_NOTEBOOK: "CONFIRM_CREATE_JUPYTER_NOTEBOOK"
 }
 
 const renderModalRemovingJuyterNotebook = (props) => {
@@ -35,11 +42,12 @@ const renderModalRemovingJuyterNotebook = (props) => {
                 },
                 {
                     opType: StandardOpType.SET_FOCUS_MODE,
-                    focusMode: OpType.NOTIFY_REMOVED_JUPYTER_NOTE
+                    focusMode: FocusMode.NOTIFY_REMOVED_JUPYTER_NOTEBOOK
                 }
             ]
         })
     }
+
     const onClickNo = () => {
         controller.run('operation', {
             ...props,
@@ -60,30 +68,20 @@ const renderModalRemovingJuyterNotebook = (props) => {
     return <Dialog {...dialogProps} />
 }
 
-const renderModalNotifyRemovedJupyterNote = (props) => {
+const renderModalNotifyRemovedJupyterNoteBook = (props) => {
     const { controller } = props;
     const onClickYes = () => {
-        // controller.run("operation", {
-        //     ...props,
-        //     opArray: [
-        //         {
-        //             opType: OpType.DELETE_ASSOCIATED_JUPYTER_NOTE
-        //         },
-        //         {
-        //             opType: StandardOpType.SET_FOCUS_MODE,
-        //             focusMode: StandardFocusMode.NORMAL
-        //         }
-        //     ]
-        // })
         controller.run("operation", {
             ...props,
-            opType: OpType.DELETE_ASSOCIATED_JUPYTER_NOTE
-        })
-        controller.run("operation", {
-            ...props,
-            opType: StandardOpType.SET_FOCUS_MODE,
-            model: controller.currentModel,
-            focusMode: StandardFocusMode.NORMAL
+            opArray: [
+                {
+                    opType: OpType.DELETE_ASSOCIATED_JUPYTER_NOTE
+                },
+                {
+                    opType: StandardOpType.SET_FOCUS_MODE,
+                    focusMode: StandardFocusMode.NORMAL
+                }
+            ]
         })
     }
 
@@ -98,9 +96,34 @@ const renderModalNotifyRemovedJupyterNote = (props) => {
     return <Dialog {...dialogProps} />
 }
 
+const renderModalConfirmCreateJupyterNotebook = (props) => {
+    const { controller } = props;
+    const onClickYes = () => {
+        createJupyterNote(props);
+    }
+
+    const onClickNo = () => {
+        controller.run('operation', {
+            ...props,
+            opType: StandardOpType.SET_FOCUS_MODE,
+            focusMode: StandardFocusMode.NORMAL
+        })
+    }
+
+    return getDialog({
+        key:  "renderModalConfirmCreateJupyterNotebook",
+        title: "An evernote note is detected to be assocated with the topic. Do you want to create it?",
+        buttons: [
+            <Button onClick={ onClickYes }>Yes</Button>,
+            <Button onClick={ onClickNo }>No</Button>
+        ]
+    });
+}
+
 const focusModeCallbacks = new Map([
     [FocusMode.REMOVING_JUPYTER_NOTEBOOK, renderModalRemovingJuyterNotebook],
-    [FocusMode.NOTIFY_REMOVED_JUPYTER_NOTE, renderModalNotifyRemovedJupyterNote]
+    [FocusMode.NOTIFY_REMOVED_JUPYTER_NOTEBOOK, renderModalNotifyRemovedJupyterNoteBook],
+    [FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK, renderModalConfirmCreateJupyterNotebook]
 ])
 
 const getNoteText = ({model, topicKey}) => {
@@ -109,14 +132,39 @@ const getNoteText = ({model, topicKey}) => {
     return block.data;
 }
 
+const createJupyterNote = (props) => {
+    const { controller, model, topicKey } = props;
+    const jupyter_notebook_id = uuidv4()
+    const jupyter_notebook_path = jupyter_notebook_id + '/' + ensureSuffix(jupyter_notebook_id, ".ipynb")
+    const text = getNoteText({model, topicKey})
+    jupyterClient.createNote(jupyter_notebook_path, text)
+        .then(isSuccess => {
+            if (isSuccess)
+            {
+                controller.run("operation", {
+                    ...props,
+                    topicKey,
+                    jupyter_notebook_path: jupyter_notebook_path,
+                    // hack: if no use controller.currentModel, the topic may not correctly be focused
+                    model: controller.currentModel,
+                    opType: OpType.CREATE_ASSOCIATED_JUPYTER_NOTE
+                })
+
+                if (controller.currentModel.focusMode === FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK)
+                {
+                    controller.run("operation", {
+                        ...props,
+                        model: controller.currentModel,
+                        opType: StandardOpType.SET_FOCUS_MODE,
+                        focusMode: FocusMode.NORMAL
+                    })
+                }
+            }
+        });
+}
+
 export function CreateJupyterNotebookPlugin()
 {
-  let jupyterClient = new JupyterClient(JUPYTER_CLIENT_ENDPOINT, {
-        jupyterBaseUrl: JUPYTER_BASE_URL,
-        rootFolder: JUPYTER_ROOT_FOLDER,
-        clientType: JUPYTER_CLIENT_TYPE
-    });
-
   return {
     getOpMap: function(props, next) {
         const opMap = next();
@@ -154,23 +202,16 @@ export function CreateJupyterNotebookPlugin()
                 alert("Can't associate jupyter note on a topic which already associates a jupyter note!")
                 return 
             }
-            const jupyter_notebook_id = uuidv4()
-            const jupyter_notebook_path = jupyter_notebook_id + '/' + ensureSuffix(jupyter_notebook_id, ".ipynb")
-            const text = getNoteText({model, topicKey})
-            jupyterClient.createNote(jupyter_notebook_path, text)
-                .then(isSuccess => {
-                    if (isSuccess)
-                    {
-                        controller.run("operation", {
-                            ...props,
-                            topicKey,
-                            jupyter_notebook_path: jupyter_notebook_path,
-                            // hack: if no use controller.currentModel, the topic may not correctly be focused
-                            model: controller.currentModel,
-                            opType: OpType.CREATE_ASSOCIATED_JUPYTER_NOTE
-                        })
-                    }
-                });
+            if (model.getIn(["extData", "evernote", topicKey]))
+            {
+                controller.run('operation', {
+                    ...props,
+                    opType: StandardOpType.SET_FOCUS_MODE,
+                    focusMode: FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK
+                })
+                return
+            }
+            createJupyterNote(props)
         }
 
         const onClickOpenJupyterNoteItem = () => {
