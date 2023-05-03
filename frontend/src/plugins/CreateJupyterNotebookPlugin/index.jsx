@@ -123,18 +123,13 @@ const focusModeCallbacks = new Map([
     [FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK, renderModalConfirmCreateJupyterNotebook]
 ])
 
-const getNoteText = ({model, topicKey}) => {
-    const topic = model.getTopic(topicKey);
-    const block = topic.getBlock(BlockType.CONTENT).block;
-    return block.data;
-}
-
 const createJupyterNote = (props) => {
-    const { controller, model, topicKey } = props;
+    const { controller, topicKey } = props;
     const jupyter_notebook_id = uuidv4()
     const jupyter_notebook_path = jupyter_notebook_id + '/' + ensureSuffix(jupyter_notebook_id, ".ipynb")
-    const text = getNoteText({model, topicKey})
-    jupyterClient.createNote(jupyter_notebook_path, text)
+    const title = controller.run('getTopicTitle', props)
+    log("note title: ", title)
+    jupyterClient.createNote(jupyter_notebook_path, title)
         .then(isSuccess => {
             if (isSuccess)
             {
