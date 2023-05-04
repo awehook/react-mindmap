@@ -1,4 +1,5 @@
 import { FocusMode, OpType, TopicRelationship, getAllSubTopicKeys, getKeyPath } from '@blink-mind/core';
+import cx from 'classnames';
 import { nonEmpty } from '../../utils';
 import format from 'date-fns/format';
 import fuzzysort from 'fuzzysort';
@@ -11,6 +12,8 @@ import { Omnibar } from '@blueprintjs/select';
 import * as React from 'react';
 import styled from 'styled-components';
 import './search-panel.css';
+import '../../icon/index.css';
+import {iconClassName} from '../../icon';
 
 const StyledNavOmniBar = styled(Omnibar)`
   top: 20%;
@@ -153,20 +156,24 @@ export function SearchPanel(props) {
   // };
 
   const renderItem = (props) => {
-   const { key, highlighted: noteTitle, parents} = props;
+   const { key: topicKey, highlighted: noteTitle, parents} = props;
     const maxLength = 100;
     const needTip = noteTitle.length > maxLength;
     const title =  needTip
       ? noteTitle.substr(0, maxLength) + '...'
       : noteTitle;
+    const isEvernoteAttached = model.getIn(["extData", "evernote", topicKey]);
+    const isJupyterNotebookAttached = model.getIn(["extData", "jupyter", topicKey]);
     const children = <div className={ "clearfix" }> 
             <span className={ "left" } dangerouslySetInnerHTML={{__html: title}} /> 
             <span className={ "right noteAttr" } > { parents } </span> 
+            { isEvernoteAttached && <span className={ cx("right", "noteAttr", iconClassName("evernote")) }></span> }
+            { isJupyterNotebookAttached && <span className={ cx("right", "noteAttr", iconClassName("jupyter")) }></span> }
             {/* <span className={ "right noteAttr" } > { notebooks.get(note.notebookGuid) ?? 'Unknown' } </span>  */}
         </div>
     const titleProps = {
-      key,
-      onClick: navigateToTopic(key),
+      key: topicKey,
+      onClick: navigateToTopic(topicKey),
       // dangerouslySetInnerHTML: {__html: title + "  " + note.notebookGuid },
       children: children
     };
@@ -177,7 +184,7 @@ export function SearchPanel(props) {
       </Tip>
     );
     const popoverProps = {
-      key,
+      key: topicKey,
       target: titleEl,
       content: tip,
       fill: true,
