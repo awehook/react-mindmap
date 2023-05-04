@@ -24,6 +24,9 @@ const TopicTitle = styled.div`
   width: 100%;
   font-size: 16px;
   cursor: pointer;
+  .highlight {
+    color: red;
+  };
   &:hover {
     background: #e3e8ec;
   }
