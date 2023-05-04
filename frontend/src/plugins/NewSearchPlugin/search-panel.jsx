@@ -1,4 +1,8 @@
-import { FocusMode, OpType, TopicRelationship, getAllSubTopicKeys } from '@blink-mind/core';
+import { FocusMode, OpType, TopicRelationship, getAllSubTopicKeys, getKeyPath } from '@blink-mind/core';
+import cx from 'classnames';
+import { nonEmpty } from '../../utils';
+import format from 'date-fns/format';
+import fuzzysort from 'fuzzysort';
 import { getRelationship } from '@blink-mind/core';
 import {
   Popover,
@@ -8,6 +12,8 @@ import { Omnibar } from '@blueprintjs/select';
 import * as React from 'react';
 import styled from 'styled-components';
 import './search-panel.css';
+import '../../icon/index.css';
+import {iconClassName} from '../../icon';
 
 const StyledNavOmniBar = styled(Omnibar)`
   top: 20%;
@@ -21,6 +27,9 @@ const TopicTitle = styled.div`
   width: 100%;
   font-size: 16px;
   cursor: pointer;
+  .highlight {
+    color: red;
+  };
   &:hover {
     background: #e3e8ec;
   }
@@ -62,9 +71,12 @@ export function SearchPanel(props) {
                                                     : getAllSubTopicKeys(model ,model.editorRootTopicKey);
     const res = avaiableTopicKeys.map(
       topicKey => { 
+        const parentKeys = getKeyPath(model, topicKey, false);
+        const parentTitles = parentKeys.map(key => controller.run('getTopicTitle', { ...props, topicKey: key}))
         return {
           key: topicKey,
-          title : controller.run('getTopicTitle', { ...props, topicKey })
+          title : controller.run('getTopicTitle', { ...props, topicKey }),
+          parents: parentTitles.join(" > ")
         }
       }
     )
@@ -106,29 +118,77 @@ export function SearchPanel(props) {
     }
   };
 
-  const renderItem = (section, props) => {
-    const { key, title: sectionTitle } = section;
+  // const renderItem = (section, props) => {
+  //   const { key, title: sectionTitle } = section;
+  //   const maxLength = 100;
+  //   const needTip = sectionTitle.length > maxLength;
+  //   const title = needTip
+  //     ? sectionTitle.substr(0, maxLength) + '...'
+  //     : sectionTitle;
+  //   const titleProps = {
+  //     key,
+  //     onClick: navigateToTopic(key)
+  //   };
+  //   const titleEl = <TopicTitle {...titleProps}>{title}</TopicTitle>;
+  //   const tip = (
+  //     <Tip>
+  //       <TipContent>{sectionTitle}</TipContent>
+  //     </Tip>
+  //   );
+  //   const popoverProps = {
+  //     key,
+  //     target: titleEl,
+  //     content: tip,
+  //     fill: true,
+  //     interactionKind: PopoverInteractionKind.HOVER_TARGET_ONLY,
+  //     hoverOpenDelay: 1000
+  //   };
+  //   return needTip ? <StyledPopover {...popoverProps} /> : titleEl;
+  // };
+
+  // const filterMatches = (
+  //   query,
+  //   items
+  // ) => {
+  //   return items.filter(item =>
+  //     item.title.toLowerCase().includes(query.toLowerCase())
+  //   );
+  // };
+
+  const renderItem = (props) => {
+   const { key: topicKey, highlighted: noteTitle, parents} = props;
     const maxLength = 100;
-    const needTip = sectionTitle.length > maxLength;
-    const title = needTip
-      ? sectionTitle.substr(0, maxLength) + '...'
-      : sectionTitle;
+    const needTip = noteTitle.length > maxLength;
+    const title =  needTip
+      ? noteTitle.substr(0, maxLength) + '...'
+      : noteTitle;
+    const isEvernoteAttached = model.getIn(["extData", "evernote", topicKey]);
+    const isJupyterNotebookAttached = model.getIn(["extData", "jupyter", topicKey]);
+    const children = <div className={ "clearfix" }> 
+            <span className={ "left" } dangerouslySetInnerHTML={{__html: title}} /> 
+            <span className={ "right noteAttr" } > { parents } </span> 
+            { isEvernoteAttached && <span className={ cx("right", "noteAttr", iconClassName("evernote")) }></span> }
+            { isJupyterNotebookAttached && <span className={ cx("right", "noteAttr", iconClassName("jupyter")) }></span> }
+            {/* <span className={ "right noteAttr" } > { notebooks.get(note.notebookGuid) ?? 'Unknown' } </span>  */}
+        </div>
     const titleProps = {
-      key,
-      onClick: navigateToTopic(key)
+      key: topicKey,
+      onClick: navigateToTopic(topicKey),
+      // dangerouslySetInnerHTML: {__html: title + "  " + note.notebookGuid },
+      children: children
     };
-    const titleEl = <TopicTitle {...titleProps}>{title}</TopicTitle>;
+    const titleEl = <TopicTitle {...titleProps}></TopicTitle>;
     const tip = (
       <Tip>
-        <TipContent>{sectionTitle}</TipContent>
+        <TipContent dangerouslySetInnerHTML={ {__html: noteTitle } }></TipContent>
       </Tip>
     );
     const popoverProps = {
-      key,
+      key: topicKey,
       target: titleEl,
       content: tip,
       fill: true,
-      interactionKind: PopoverInteractionKind.HOVER_TARGET_ONLY,
+      interactionKind: 'HOVER_TARGET_ONLY',
       hoverOpenDelay: 1000
     };
     return needTip ? <StyledPopover {...popoverProps} /> : titleEl;
@@ -138,9 +198,14 @@ export function SearchPanel(props) {
     query,
     items
   ) => {
-    return items.filter(item =>
-      item.title.toLowerCase().includes(query.toLowerCase())
-    );
+     return fuzzysort.go(query.toLowerCase(), 
+              items,
+              {threshold: -10000, key: 'title'}).map(res => {
+                return {
+                  ...res['obj'],
+                  fuzzySearchResult: res, 
+                  highlighted: fuzzysort.highlight(res, '<b class="highlight">')};
+              })
   };
 
   const sections = getAllSections();

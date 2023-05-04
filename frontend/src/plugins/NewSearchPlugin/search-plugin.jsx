@@ -2,7 +2,7 @@ import { OpType } from '@blink-mind/core';
 import { Switch } from '@blueprintjs/core';
 import * as React from 'react';
 import { SearchPanel } from './search-panel';
-import { FOCUS_MODE_SEARCH, HOT_KEY_NAME_SEARCH } from './utils';
+import { FOCUS_MODE_SEARCH, HOT_KEY_NAME_SEARCH, HOT_KEY_NAME_SEARCH2 } from './utils';
 import styled from 'styled-components';
 
 const newOperations = {
@@ -31,18 +31,27 @@ export function NewSearchPlugin() {
       const { controller, model } = props;
       const hotKeys = next();
 
+      const onKeyDown = () => {
+        controller.run('operation', {
+          ...props,
+          opType: OpType.FOCUS_TOPIC,
+          topicKey: model.focusKey,
+          focusMode: FOCUS_MODE_SEARCH
+        });
+      }
+
       hotKeys.globalHotKeys.set(HOT_KEY_NAME_SEARCH, {
         label: 'search',
-        combo: 'ctrl + f',
-        onKeyDown: () => {
-          controller.run('operation', {
-            ...props,
-            opType: OpType.FOCUS_TOPIC,
-            topicKey: model.focusKey,
-            focusMode: FOCUS_MODE_SEARCH
-          });
-        }
+        combo: 'ctrl + j',
+        onKeyDown
       });
+
+      hotKeys.globalHotKeys.set(HOT_KEY_NAME_SEARCH2, {
+        label: 'search2',
+        combo: 'ctrl + q',
+        onKeyDown
+      });
+
       return hotKeys;
     },
 
