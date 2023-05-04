@@ -12,5 +12,5 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/catwang01/react-mindmap/issues"
     },
     packages=setuptools.find_packages(),
-    python_requires=">=3.6",
+    python_requires=">=3.7.0",
 )

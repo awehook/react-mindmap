@@ -36,7 +36,8 @@ def create_notebook():
     template_name = request.get_json().get("template_name", "basic")
     note_title = request.get_json().get("note_title", "Untitled")
     parents = request.get_json().get("parents", False)
-    interpolated = get_template({"note_title": note_title}, template_name)
+    note_tags = "" if note_title == "Untitled" else ",".join(note_title.strip().split(" "))
+    interpolated = get_template({"note_title": note_title, "note_tags": note_tags}, template_name)
     try:
         if parents:
             parent_path = get_parent_path(path)
