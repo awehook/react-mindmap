@@ -89,7 +89,7 @@ export function ToolbarItemSync(props) {
   return (
     <div className={cx("bm-toolbar-item", iconClassName("loop2"))}>
       <Popover enforceFocus={false}>
-        <div className="bm-toolbar-sync" />
+        <div className="bm-toolbar-popover-target" />
         <Menu>
           <MenuItem text="Pull" onClick={ onClickPull } />
           <MenuItem text="Push" onClick={ onClickPush } />
