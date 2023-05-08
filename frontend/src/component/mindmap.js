@@ -28,6 +28,7 @@ import {
 import { generateSimpleModel, getNotesFromModel } from "../utils";
 import { Toolbar } from "./toolbar/toolbar";
 import { StandardDebugPlugin } from "../plugins/StandardDebugPlugin/debug-plugin";
+import { FixGetTopicTitlePlugin } from "../plugins/FixGetTopicTitlePlugin";
 
 const log = debug("app");
 
@@ -50,6 +51,7 @@ const plugins = [
   TopologyDiagramPlugin(),
   JsonSerializerPlugin(),
   CopyPastePlugin(),
+  FixGetTopicTitlePlugin()
 ];
 
 class MyController extends Controller {
