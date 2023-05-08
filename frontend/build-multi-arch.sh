@@ -1,6 +1,5 @@
-REGISTRY_LINK="<your_registry_link>"
-PLATFORMS="linux/arm/v7"
+cd $(dirname -- "$( readlink -f -- "$0"; )")
 docker buildx build . \
-    --platform $PLATFORMS \
-    -t ${REGISTRY_LINK}/react-mindmap-frontend \
+    --platform ${PLATFORMS} \
+    -t ${REGISTRY_LINK}/react-mindmap-frontend:$TAG \
     --output=type=image,push=true,registry.insecure=true
