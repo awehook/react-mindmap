@@ -16,8 +16,8 @@ let jupyterClient = new JupyterClient(JUPYTER_CLIENT_ENDPOINT, {
     clientType: JUPYTER_CLIENT_TYPE
 });
 
-const getIcon = () => {
-    return <div className="icon-jupyter"></div>
+const JupyterIcon = () => {
+    return <div className="icon-jupyter" />
 }
 
 export const OpType = {
@@ -67,8 +67,8 @@ const renderModalRemovingJuyterNotebook = (props) => {
             key: "renderModalRemovingJuyterNotebook",
             title: "Do you want to remove the attached jupyter note?",
             buttons: [
-                <Button onClick={ onClickYes }>Yes</Button>,
-                <Button onClick={ onClickNo }>No</Button> 
+                <Button onClick={onClickYes}>Yes</Button>,
+                <Button onClick={onClickNo}>No</Button>
             ]
         }
     );
@@ -92,9 +92,9 @@ const renderModalNotifyRemovedJupyterNoteBook = (props) => {
     }
     return getDialog(
         {
-            key:  "renderModalNotifyRemovedJupyterNote",
-            title: "The jupyter note has been remove!" ,
-            buttons: [<Button onClick={ onClickYes }>Yes</Button>]
+            key: "renderModalNotifyRemovedJupyterNote",
+            title: "The jupyter note has been remove!",
+            buttons: [<Button onClick={onClickYes}>Yes</Button>]
         }
     )
 }
@@ -114,11 +114,11 @@ const renderModalConfirmCreateJupyterNotebook = (props) => {
     }
 
     return getDialog({
-        key:  "renderModalConfirmCreateJupyterNotebook",
+        key: "renderModalConfirmCreateJupyterNotebook",
         title: "An evernote note is detected to be assocated with the topic. Do you want to create it?",
         buttons: [
-            <Button onClick={ onClickYes }>Yes</Button>,
-            <Button onClick={ onClickNo }>No</Button>
+            <Button onClick={onClickYes}>Yes</Button>,
+            <Button onClick={onClickNo}>No</Button>
         ]
     });
 }
@@ -137,8 +137,7 @@ const createJupyterNote = (props) => {
     log("note title: ", title)
     jupyterClient.createNote(jupyter_notebook_path, title)
         .then(isSuccess => {
-            if (isSuccess)
-            {
+            if (isSuccess) {
                 controller.run("operation", {
                     ...props,
                     topicKey,
@@ -148,8 +147,7 @@ const createJupyterNote = (props) => {
                     opType: OpType.CREATE_ASSOCIATED_JUPYTER_NOTE,
                     callback: () => openJupyterNotebookLink(jupyter_notebook_path)
                 })
-                if (controller.currentModel.focusMode === FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK)
-                {
+                if (controller.currentModel.focusMode === FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK) {
                     controller.run("operation", {
                         ...props,
                         model: controller.currentModel,
@@ -161,145 +159,142 @@ const createJupyterNote = (props) => {
         });
 }
 
-export function CreateJupyterNotebookPlugin()
-{
-  return {
-    getOpMap: function(props, next) {
-        const opMap = next();
-        const { jupyter_notebook_path, topicKey } = props;
-        opMap.set(OpType.CREATE_ASSOCIATED_JUPYTER_NOTE, ({ model }) => { 
-            const newModel = model.setIn(["extData", "jupyter", topicKey, "path"], jupyter_notebook_path)
-            return newModel; 
-        });
-        opMap.set(OpType.DELETE_ASSOCIATED_JUPYTER_NOTE, ({ model }) => { 
-            const newModel = model.deleteIn(['extData', 'jupyter', model.focusKey]);
-            return newModel; 
-        });
+export function CreateJupyterNotebookPlugin() {
+    const openJupyterNotebookFromTopic = (props) => {
+        const { model, topicKey } = props;
+        const jupyter_notebook_path = model.getIn(['extData', 'jupyter', topicKey, "path"])
+        if (jupyter_notebook_path) {
+            openJupyterNotebookLink(jupyter_notebook_path)
+        }
+        else {
+            alert("No jupyter notebook is attachd");
+        }
+    }
 
-        return opMap;
-    },
-    renderTopicContentOthers: function(props, next) {
-        const { topicKey, model }  = props;
-        const jupyterData = model.getIn(['extData', 'jupyter'], new ImmutableMap());
-        const res = next();
-        return <>
-            { res }
-            { jupyterData.get(topicKey) &&  getIcon() }
-        </>
-    },
-    customizeTopicContextMenu: function(props, next) {
-        log("customizeTopicContextMenu")
-        log("parameters: ", props)
+    return {
+        getOpMap: function (props, next) {
+            const opMap = next();
+            const { jupyter_notebook_path, topicKey } = props;
+            opMap.set(OpType.CREATE_ASSOCIATED_JUPYTER_NOTE, ({ model }) => {
+                const newModel = model.setIn(["extData", "jupyter", topicKey, "path"], jupyter_notebook_path)
+                return newModel;
+            });
+            opMap.set(OpType.DELETE_ASSOCIATED_JUPYTER_NOTE, ({ model }) => {
+                const newModel = model.deleteIn(['extData', 'jupyter', model.focusKey]);
+                return newModel;
+            });
 
-        const { topicKey, model, controller } = props;
+            return opMap;
+        },
+        renderTopicContentOthers: function (props, next) {
+            const { topicKey, model } = props;
+            const jupyterData = model.getIn(['extData', 'jupyter'], new ImmutableMap());
+            const res = next();
+            return <>
+                {res}
+                {jupyterData.get(topicKey) && <div onClick={() => openJupyterNotebookFromTopic(props)} > <JupyterIcon /></div>}
+            </>
+        },
+        customizeTopicContextMenu: function (props, next) {
+            log("customizeTopicContextMenu")
+            log("parameters: ", props)
 
-        const onClickCreateNoteItem = () => {
-            log("create note is invoked")
-            if (model.getIn(["extData", "jupyter", topicKey]))
-            {
-                alert("Can't associate jupyter note on a topic which already associates a jupyter note!")
-                return 
+            const { topicKey, model, controller } = props;
+
+            const onClickCreateNoteItem = () => {
+                log("create note is invoked")
+                if (model.getIn(["extData", "jupyter", topicKey])) {
+                    alert("Can't associate jupyter note on a topic which already associates a jupyter note!")
+                    return
+                }
+                if (model.getIn(["extData", "evernote", topicKey])) {
+                    controller.run('operation', {
+                        ...props,
+                        opType: StandardOpType.SET_FOCUS_MODE,
+                        focusMode: FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK
+                    })
+                    return
+                }
+                createJupyterNote(props)
             }
-            if (model.getIn(["extData", "evernote", topicKey]))
-            {
+
+            const onClickOpenJupyterNoteItem = () => openJupyterNotebookFromTopic(props)
+
+            const onClickRemoveJupyterNoteItem = () => {
+                const { controller } = props;
                 controller.run('operation', {
                     ...props,
                     opType: StandardOpType.SET_FOCUS_MODE,
-                    focusMode: FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK
+                    // hack: if no use controller.currentModel, the topic may not correctly be focused
+                    model: controller.currentModel,
+                    focusMode: FocusMode.REMOVING_JUPYTER_NOTEBOOK,
                 })
-                return
             }
-            createJupyterNote(props)
-        }
 
-        const onClickOpenJupyterNoteItem = () => {
-            const { model, topicKey } = props;
-            const jupyter_notebook_path = model.getIn(['extData', 'jupyter', topicKey, "path"])
-            if (jupyter_notebook_path)
-            {
-                openJupyterNotebookLink(jupyter_notebook_path)
-            }
-            else 
-            {
-                alert("No jupyter notebook is attachd");
-            }
-        }
-
-        const onClickRemoveJupyterNoteItem = () => {
-            const { controller } = props;
-            controller.run('operation', {
-                ...props,
-                opType: StandardOpType.SET_FOCUS_MODE,
-                // hack: if no use controller.currentModel, the topic may not correctly be focused
-                model: controller.currentModel,
-                focusMode: FocusMode.REMOVING_JUPYTER_NOTEBOOK,
-            })
-        }
-
-        const createJupyterNoteItem = <MenuItem
-              icon={ getIcon() }
-              key={"create note"}
-              text={ "Create jupyter note" }
-              // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
-              onClick={onClickCreateNoteItem}
+            const createJupyterNoteItem = <MenuItem
+                icon={<JupyterIcon />}
+                key={"create note"}
+                text={"Create jupyter note"}
+                // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
+                onClick={onClickCreateNoteItem}
             />
 
-        const openJupyterNoteItem = <MenuItem
-              icon={ getIcon() }
-              key={"open jupyter note"}
-              text={ "Open jupyter note" }
-              // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
-              onClick={onClickOpenJupyterNoteItem}
+            const openJupyterNoteItem = <MenuItem
+                icon={<JupyterIcon />}
+                key={"open jupyter note"}
+                text={"Open jupyter note"}
+                // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
+                onClick={onClickOpenJupyterNoteItem}
             />
 
-        const removeJupyterNoteItem = <MenuItem
-              icon={ getIcon() }
-              key={"remove jupyter note"}
-              text={ "Remove jupyter note" }
-              // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
-              onClick={onClickRemoveJupyterNoteItem}
+            const removeJupyterNoteItem = <MenuItem
+                icon={<JupyterIcon />}
+                key={"remove jupyter note"}
+                text={"Remove jupyter note"}
+                // labelElement={<kbd>{ "Ctrl + a" }</kbd>}
+                onClick={onClickRemoveJupyterNoteItem}
             />
-        
-        const jupyterData = model.getIn(["extData", "jupyter"], new ImmutableMap());
-        const associatedWithJupyterNote = jupyterData.has(topicKey)
 
-      return <>
-          { next() }
-          { <MenuDivider />}
-          { createJupyterNoteItem }
-          { associatedWithJupyterNote && openJupyterNoteItem }
-          { associatedWithJupyterNote && removeJupyterNoteItem }
-      </>;
-    },
+            const jupyterData = model.getIn(["extData", "jupyter"], new ImmutableMap());
+            const associatedWithJupyterNote = jupyterData.has(topicKey)
 
-    renderModal: (props, next) => {
-        const { model: { focusMode } } = props;
-        const res = next();
-        if (!focusModeCallbacks.has(focusMode))
+            return <>
+                {next()}
+                {<MenuDivider />}
+                {createJupyterNoteItem}
+                {associatedWithJupyterNote && openJupyterNoteItem}
+                {associatedWithJupyterNote && removeJupyterNoteItem}
+            </>;
+        },
+
+        renderModal: (props, next) => {
+            const { model: { focusMode } } = props;
+            const res = next();
+            if (!focusModeCallbacks.has(focusMode))
+                return res;
+
+            const newRes = focusModeCallbacks.get(focusMode)(props)
+
+            return res === null ? [newRes] : [...res, newRes]
+        },
+
+        getAllowUndo(props, next) {
+            const res = next();
+            if (!res)
+                return false;
+            const { model } = props;
+            if (FocusMode.hasOwnProperty(model.focusMode))
+                return false;
             return res;
+        },
 
-        const newRes = focusModeCallbacks.get(focusMode)(props)
-
-        return res === null ? [ newRes ] : [ ...res, newRes ]
-    },
-
-    getAllowUndo(props, next) {
-        const res = next();
-        if (!res)
-            return false;
-        const { model } = props;
-        if (FocusMode.hasOwnProperty(model.focusMode))
-            return false;
-        return res;
-    },
-
-    deserializeExtData: (props, next) => {
-      const extData = next();
-      let newExtData = extData;
-      const jupyterData = extData.get('jupyter')
-      if (jupyterData)
-          newExtData = extData.set('jupyter', new ImmutableMap(jupyterData));
-      return newExtData;
+        deserializeExtData: (props, next) => {
+            const extData = next();
+            let newExtData = extData;
+            const jupyterData = extData.get('jupyter')
+            if (jupyterData)
+                newExtData = extData.set('jupyter', new ImmutableMap(jupyterData));
+            return newExtData;
+        }
     }
-  }
 }

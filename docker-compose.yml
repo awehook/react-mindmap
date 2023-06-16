@@ -2,6 +2,7 @@ version: "${TAG}"
 services:
   backend: 
     build: backend
+    image: react-mindmap-backend:${TAG}
     ports: 
       - "5000:5001"
     environment:
@@ -10,6 +11,7 @@ services:
       JUPYTER_PASSWORD: "${JUPYTER_PASSWORD}"
   frontend:
     build: frontend
+    image: react-mindmap-frontend:${TAG}
     ports: 
       - "8080:8080"
     environment:
