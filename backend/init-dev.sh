@@ -1,4 +1,4 @@
 #!/bin/bash
-python -m .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/pip install -r requirements-dev.txt
+python -m venv .venv 
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -r requirements-dev.txt

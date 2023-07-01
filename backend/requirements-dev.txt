@@ -1,1 +1,3 @@
 types-PyMySQL==1.0.19.1
+mypy
+pylint

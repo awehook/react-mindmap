@@ -1,4 +1,5 @@
 export * from './FixCollapseAllPlugin';
+export * from './FixGetTopicTitlePlugin'
 export * from './DebugPlugin';
 export * from './CustomizeJsonSerializerPlugin';
 export * from './CounterPlugin';
@@ -9,3 +10,5 @@ export * from './NewSearchPlugin';
 export * from './StandardDebugPlugin';
 export * from './CopyPastePlugin'
 export * from './CreateJupyterNotebookPlugin'
+export * from './AutoSyncPlugin'
+export * from './AutoSaveModelPlugin'

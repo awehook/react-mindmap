@@ -1,14 +1,14 @@
-import { BlockType, OpType as StandardOpType, FocusMode as StandardFocusMode } from '@blink-mind/core';
+import { FocusMode as StandardFocusMode, OpType as StandardOpType } from '@blink-mind/core';
 import { Button, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { Map as ImmutableMap, } from 'immutable';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import '../../icon/index.css';
 import { JUPYTER_BASE_URL, JUPYTER_CLIENT_ENDPOINT, JUPYTER_CLIENT_TYPE, JUPYTER_ROOT_FOLDER } from './constant';
+import { getDialog } from './dialog';
 import { JupyterClient } from './jupyter';
 import { log } from './logger';
 import { ensureSuffix } from './utils';
-import { getDialog } from './dialog';
 
 let jupyterClient = new JupyterClient(JUPYTER_CLIENT_ENDPOINT, {
     jupyterBaseUrl: JUPYTER_BASE_URL,

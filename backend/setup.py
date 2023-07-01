@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="reactmindmap-backend",
-    version="0.0.2",
+    version="0.0.4",
     author="catwang01",
     author_email="edwardelricwzx@gmail.com",
     description="Backend project for react mind map",
