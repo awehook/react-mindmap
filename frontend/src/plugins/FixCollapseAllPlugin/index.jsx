@@ -1,5 +1,5 @@
 import debug from "debug";
-import { getAllSubTopicKeys, ModelModifier, OpType } from "@blink-mind/core";
+import { FocusMode, getAllSubTopicKeys, ModelModifier, OpType } from "@blink-mind/core";
 
 const log = debug("app");
 
@@ -19,7 +19,11 @@ export function FixCollapseAllPlugin() {
             });
           });
           // focus to root topic to avoid referencing unrendered topics
-          model = ModelModifier.focusTopic({ model, topicKey: model.editorRootTopicKey });
+          model = ModelModifier.focusTopic({
+            model,
+            focusMode: FocusMode.NORMAL,
+            topicKey: model.editorRootTopicKey
+          });
           log(model);
           return model;
         }

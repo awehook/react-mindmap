@@ -33,3 +33,5 @@ The original Diagram component doesn't support the previous Counter component we
 2022-10-07: Fix the bug of ASSOCIATE_A_NOTE
 
 Use `controller.run('operations', {opType: FOCUS_TOPIC})` instead of modify model directly.
+
+2023-07-05: Fix the bug of missing focusMode in FixCollapseAllPlugin
