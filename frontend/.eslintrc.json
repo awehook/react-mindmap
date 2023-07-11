@@ -1,6 +1,7 @@
 {
     "env": {
         "browser": true,
+        "node": true,
         "es2021": true
     },
     "parser":"babel-eslint",
@@ -17,6 +18,7 @@
         "brace-style": ["off", "stroustrup"],
         "eqeqeq": ["off", "smart"],
         "indent": ["off", "double"],
-        "no-trailing-spaces": ["off"]
+        "no-trailing-spaces": ["off"],
+        "no-undef": ["error"]
     }
 }

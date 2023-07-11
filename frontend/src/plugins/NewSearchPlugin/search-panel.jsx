@@ -1,19 +1,15 @@
-import { FocusMode, OpType, TopicRelationship, getAllSubTopicKeys, getKeyPath } from '@blink-mind/core';
-import cx from 'classnames';
-import { nonEmpty } from '../../utils';
-import format from 'date-fns/format';
-import fuzzysort from 'fuzzysort';
-import { getRelationship } from '@blink-mind/core';
+import { FocusMode, OpType, TopicRelationship, getAllSubTopicKeys, getKeyPath, getRelationship } from '@blink-mind/core';
 import {
-  Popover,
-  PopoverInteractionKind
+  Popover
 } from '@blueprintjs/core';
 import { Omnibar } from '@blueprintjs/select';
+import cx from 'classnames';
+import fuzzysort from 'fuzzysort';
 import * as React from 'react';
 import styled from 'styled-components';
-import './search-panel.css';
+import { iconClassName } from '../../icon';
 import '../../icon/index.css';
-import {iconClassName} from '../../icon';
+import './search-panel.css';
 
 const StyledNavOmniBar = styled(Omnibar)`
   top: 20%;
@@ -155,9 +151,10 @@ export function SearchPanel(props) {
   //   );
   // };
 
-  const renderItem = (props) => {
-   const { key: topicKey, highlighted: noteTitle, parents} = props;
-    const maxLength = 100;
+  const renderItem = (item, itemProps) => {
+    const { key: topicKey, highlighted: noteTitle, parents } = item;
+    const { modifiers } = itemProps;
+    const maxLength = 10000;
     const needTip = noteTitle.length > maxLength;
     const title =  needTip
       ? noteTitle.substr(0, maxLength) + '...'
@@ -173,9 +170,12 @@ export function SearchPanel(props) {
         </div>
     const titleProps = {
       key: topicKey,
-      onClick: navigateToTopic(topicKey),
       // dangerouslySetInnerHTML: {__html: title + "  " + note.notebookGuid },
-      children: children
+      children: children,
+      onClick: (e) => navigateToTopic(item.key)(e),
+      style: {
+        background: modifiers.active ? "#e3e8ec" : "#fff" 
+      }
     };
     const titleEl = <TopicTitle {...titleProps}></TopicTitle>;
     const tip = (
@@ -189,9 +189,9 @@ export function SearchPanel(props) {
       content: tip,
       fill: true,
       interactionKind: 'HOVER_TARGET_ONLY',
-      hoverOpenDelay: 1000
+      hoverOpenDelay: 1000,
     };
-    return needTip ? <StyledPopover {...popoverProps} /> : titleEl;
+   return needTip ? <StyledPopover {...popoverProps} /> : titleEl;
   };
 
   const filterMatches = (
@@ -217,9 +217,8 @@ export function SearchPanel(props) {
       isOpen={true}
       items={sections}
       itemRenderer={renderItem}
-      // onItemSelect={handleItemSelect}
       onClose={onClose}
-      resetOnSelect={true}
+      onItemSelect={(item, e) => navigateToTopic(item.key)(e)}
     />
   );
 }

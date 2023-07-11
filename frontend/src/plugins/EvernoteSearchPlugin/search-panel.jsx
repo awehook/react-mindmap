@@ -111,8 +111,10 @@ export function SearchPanel(props) {
     })
   }
 
-  const renderItem = (note, props) => {
-   const { guid, highlighted: noteTitle } = note;
+  const renderItem = (item, props) => {
+    const note = item;
+    const { modifiers } = props;
+    const { guid, highlighted: noteTitle } = note;
     const maxLength = 100;
     const needTip = note.title.length > maxLength;
     const title =  needTip
@@ -127,9 +129,12 @@ export function SearchPanel(props) {
         </div>
     const titleProps = {
       key: guid,
-      onClick: attachNote({ guid, title: note.title }),
       // dangerouslySetInnerHTML: {__html: title + "  " + note.notebookGuid },
-      children: children
+      onClick: attachNote(item),
+      children: children,
+      style: {
+        background: modifiers.active ? '#e3e8ec' : '#fff'
+      }
     };
     const titleEl = <TopicTitle {...titleProps}></TopicTitle>;
     const tip = (
@@ -190,7 +195,10 @@ export function SearchPanel(props) {
       items={ items }
       itemRenderer={renderItem}
       onClose={onClose}
-      resetOnSelect={true}
+      onItemSelect={(item, e) => {
+        attachNote(item)()
+      }
+      }
     />
   );
 }

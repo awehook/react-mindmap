@@ -317,3 +317,4 @@ restart.sh
 data
 *.env.local
 *.log
+pull.sh

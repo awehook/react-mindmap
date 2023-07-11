@@ -6,8 +6,8 @@ if [ -f .env.local ]; then
 fi
 set +o allexport
 
-# echo "Building frontend image..."
-# frontend/build-multi-arch.sh > frontend.log 2>&1 &
+echo "Building frontend image..."
+frontend/build-multi-arch.sh > frontend.log 2>&1 &
 
 echo "Building backend image..."
 backend/build-multi-arch.sh > backend.log 2>&1 &

@@ -19,14 +19,18 @@ import {
   CreateJupyterNotebookPlugin,
   CustomizeJsonSerializerPlugin,
   DebugPlugin,
+  VimHotKeyPlugin,
+  EvernotePlugin,
   EvernoteSearchPlugin,
   FixCollapseAllPlugin,
-  HotKeyPlugin,
+  FixHotKeyPlugin,
   NewSearchPlugin,
   AutoSyncPlugin,
   AutoSaveModelPlugin,
   FixGetTopicTitlePlugin,
-  StandardDebugPlugin
+  StandardDebugPlugin,
+  EnhancedOperationPlugin,
+  TopicHistoryPlugin
 } from '../plugins';
 import { generateSimpleModel, getNotesFromModel } from "../utils";
 import { Toolbar } from "./toolbar/toolbar";
@@ -37,14 +41,19 @@ const ViewModeMindMap = 'MindMap'
 
 const plugins = [
   // RichTextEditorPlugin(),
+  FixCollapseAllPlugin(),
+  FixHotKeyPlugin(),
+  FixGetTopicTitlePlugin(),
+
+  EnhancedOperationPlugin(),
+  VimHotKeyPlugin(),
   DebugPlugin(),
   StandardDebugPlugin(),
   CustomizeJsonSerializerPlugin(),
   AddNewOperationsPlugin(),
-  FixCollapseAllPlugin(),
   CounterPlugin(),
   CreateJupyterNotebookPlugin(),
-  HotKeyPlugin(),
+  EvernotePlugin(),
   ThemeSelectorPlugin(),
   TopicReferencePlugin(),
   NewSearchPlugin(),
@@ -52,9 +61,9 @@ const plugins = [
   TopologyDiagramPlugin(),
   JsonSerializerPlugin(),
   CopyPastePlugin(),
-  FixGetTopicTitlePlugin(),
   AutoSyncPlugin(),
-  AutoSaveModelPlugin()
+  AutoSaveModelPlugin(),
+  TopicHistoryPlugin()
 ];
 
 class MyController extends Controller {
