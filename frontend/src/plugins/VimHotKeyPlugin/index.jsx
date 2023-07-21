@@ -1,5 +1,6 @@
 import '../../icon/index.css';
 import { FOCUS_MODE_SEARCH } from '../NewSearchPlugin/utils';
+import { getKeyPath, getRelationship, TopicRelationship } from '@blink-mind/core';
 
 import { FocusMode, OpType, } from "@blink-mind/core";
 import { empty, isTopicVisible } from '../../utils';
@@ -9,8 +10,96 @@ import { OpType as EvernoteRelatedOpType } from '../EvernotePlugin';
 import { hasEvernoteAttached } from '../EvernotePlugin/utils';
 
 export const NewOpType = {
-  FOCUS_TOPIC_AND_MOVE_TO_CENTER: "FOCUS_TOPIC_AND_MOVE_TO_CENTER"
+  FOCUS_TOPIC_AND_MOVE_TO_CENTER: "FOCUS_TOPIC_AND_MOVE_TO_CENTER",
+  SET_EDITOR_ROOT_AND_MOVE_TO_CENTER: "SET_EDITOR_ROOT_AND_MOVE_TO_CENTER",
+  ENHANCED_EXPAND_TO: "ENHANCED_EXPAND_TO"
 }
+
+const newOpTypeItems = [
+  [
+    NewOpType.FOCUS_TOPIC_AND_MOVE_TO_CENTER,
+    (props) => {
+      const {
+        controller,
+        topicKey,
+        focusMode: focusMode = FocusMode.NORMAL,
+        allowUndo,
+        includeInHistory
+      } = props;
+      delete props['opType'];
+      controller.run('operation', {
+        ...props,
+        opArray: [
+          {
+            opType: OpType.FOCUS_TOPIC,
+            topicKey,
+            focusMode,
+            allowUndo,
+            includeInHistory
+          },
+          {
+            opType: NewOpType.ENHANCED_EXPAND_TO,
+            topicKey
+          }
+        ],
+        callback: () => {
+          controller.run('moveTopicToCenter', { ...props, topicKey });
+        }
+      });
+      return controller.currentModel;
+    }
+  ],
+  [
+    NewOpType.SET_EDITOR_ROOT_AND_MOVE_TO_CENTER,
+    (props) => {
+      const {
+        controller,
+        topicKey,
+        focusMode: focusMode = FocusMode.NORMAL,
+        allowUndo,
+        includeInHistory,
+      } = props;
+      delete props['opType'];
+      controller.run('operation', {
+        ...props,
+        opArray: [
+          {
+            opType: OpType.SET_EDITOR_ROOT,
+            topicKey,
+            focusMode,
+            allowUndo,
+            includeInHistory,
+          },
+        ],
+        callback: () => {
+          controller.run('moveTopicToCenter', { ...props, topicKey });
+        }
+      });
+      return controller.currentModel;
+    }
+  ],
+  [
+    NewOpType.ENHANCED_EXPAND_TO,
+    (props) => {
+      let { model, topicKey } = props;
+      const keys = getKeyPath(model, topicKey).filter(t => t !== topicKey);
+      model = model.withMutations(m => {
+        keys.forEach(topicKey => {
+          m.setIn(['topics', topicKey, 'collapse'], false);
+        });
+      });
+      // 要让这个节点在视口中可见
+      if (
+        topicKey !== model.editorRootTopicKey &&
+        getRelationship(model, topicKey, model.editorRootTopicKey) !==
+        TopicRelationship.DESCENDANT
+      ) {
+        model = model.set('editorRootTopicKey', model.rootTopicKey);
+      }
+      return model;
+    }
+  ]
+]
 
 function op(opType, props) {
   const { topicKey, controller } = props;
@@ -95,35 +184,9 @@ export function VimHotKeyPlugin() {
   return {
     getOpMap: function (props, next) {
       const opMap = next();
-      opMap.set(NewOpType.FOCUS_TOPIC_AND_MOVE_TO_CENTER, (props) => {
-        const {
-          controller,
-          topicKey,
-          focusMode: focusMode = FocusMode.NORMAL,
-          allowUndo,
-          includeInHistory
-        } = props;
-        delete props['opType'];
-        controller.run('operation', {
-          ...props,
-          opArray: [
-            {
-              opType: OpType.FOCUS_TOPIC,
-              topicKey,
-              focusMode,
-              allowUndo,
-              includeInHistory
-            },
-            {
-              opType: OpType.EXPAND_TO,
-              topicKey
-            }
-          ],
-          callback: () => {
-            controller.run('moveTopicToCenter', { ...props, topicKey });
-          }
-        });
-        return controller.currentModel;
+      newOpTypeItems.forEach(item => {
+        const [opKey, opFunc] = item;
+        opMap.set(opKey, opFunc);
       });
       return opMap;
     },
@@ -312,7 +375,7 @@ export function VimHotKeyPlugin() {
             label: 'set as editor root',
             combo: 'r',
             allowInInput: true,
-            onKeyDown: handleHotKeyDown(OpType.SET_EDITOR_ROOT)
+            onKeyDown: handleHotKeyDown(NewOpType.SET_EDITOR_ROOT_AND_MOVE_TO_CENTER)
           }
         ],
         [
