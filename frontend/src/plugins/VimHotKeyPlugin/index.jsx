@@ -43,7 +43,7 @@ const newOpTypeItems = [
           }
         ],
         callback: () => {
-          controller.run('moveTopicToCenter', { ...props, topicKey });
+          controller.run('moveTopicToCenter', { ...props, model: controller.currentModel, topicKey });
         }
       });
       return controller.currentModel;
@@ -72,7 +72,7 @@ const newOpTypeItems = [
           },
         ],
         callback: () => {
-          controller.run('moveTopicToCenter', { ...props, topicKey });
+          controller.run('moveTopicToCenter', { ...props, model: controller.currentModel, topicKey });
         }
       });
       return controller.currentModel;
