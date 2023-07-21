@@ -35,3 +35,7 @@ The original Diagram component doesn't support the previous Counter component we
 Use `controller.run('operations', {opType: FOCUS_TOPIC})` instead of modify model directly.
 
 2023-07-05: Fix the bug of missing focusMode in FixCollapseAllPlugin
+
+2023-07-21: 
+1. Fix the bug of by introducing a ENHANCED_EXPAND_TO instead of EXPAND_TO.
+2. Move topic to center when changing root.
