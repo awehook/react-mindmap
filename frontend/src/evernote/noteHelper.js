@@ -1,4 +1,5 @@
 import { getEnv } from "../utils";
+import { log } from "./log";
 import EvernoteClient from "./client";
 
 const evernoteCient = new EvernoteClient(
@@ -55,6 +56,6 @@ export const mergeNotes = (oldNotes, newNotes) => {
 export const removeDeletedNotes = (deleteNotes, notes) => {
   const noteDict = new Map(deleteNotes.map(note => [note.guid, note]));
   const removedNoteTitles = notes.filter(note => noteDict.has(note.guid)).map(note => note.title);
-  console.log(`Removed ${removedNoteTitles.length} notes: ${removedNoteTitles.join(', ')}`);
+  log(`Removed ${removedNoteTitles.length} notes: ${removedNoteTitles.join(', ')}`);
   return notes.filter(note => !noteDict.has(note.guid));
 }

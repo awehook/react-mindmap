@@ -1,4 +1,5 @@
 import { MenuItem } from "@blueprintjs/core";
+import { debug } from "debug";
 import React from 'react';
 import { MyTopicWidget } from "../../component/MyTopicWidget";
 import { KeyboardHotKeyWidget } from '../../component/keyboardHotKeyWidget';
@@ -11,6 +12,8 @@ import { getEvernoteIcon, hasEvernoteAttached } from "./utils";
 let HotKeyName = {
   ASSOCIATE_NOTE: 'ASSOCIATE_NOTE',
 };
+
+const log = debug("plugin:EvernotePlugin")
 
 function op(opType, props) {
   const { topicKey, controller } = props;
@@ -134,7 +137,7 @@ export function EvernotePlugin() {
     getAllowUndo: (props, next) => {
       const { model } = props;
       const res = next();
-      console.log({ allow: res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, props })
+      log({ allow: res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH, props })
       return res && model.focusMode !== FOCUS_MODE_SEARCH_NOTE_TO_ATTACH;
     },
     renderTopicContentOthers: function (props, next) {

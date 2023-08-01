@@ -11,9 +11,16 @@ let log = debug('plugin:StandardDebugPlugin')
 
 const builtInDebugNameSpaces = [
   "app",
+  "app:evernote",
   "plugin:CreateJupyterNotebookPlugin",
   "plugin:StandardDebugPlugin",
-  "plugin:DebugPlugin"
+  "plugin:DebugPlugin",
+  "plugin:TopicHistoryPlugin",
+  "plugin:AutoSyncPlugin",
+  "plugin:AutoSaveModelPlugin",
+  "plugin:VimHotKeyPlugin",
+  "plugin:CounterPlugin",
+  "plugin:EvernotePlugin"
 ];
 
 if (!localStorage.allDebugNS)

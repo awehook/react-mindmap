@@ -16,53 +16,53 @@ const uploadGraph = async ({ controller, model, callback }) => {
     const serializedModel = controller.run('serializeModel', { controller, model: newModel });
     const serializedModelJson = JSON.stringify(serializedModel)
     await connection.push(serializedModelJson, parentVersion, version);
-    console.log("Auto sync successfully!");
+    log("Auto sync successfully!");
     callback && callback();
 }
 
 async function saveCache({ controller }, callback = () => { }) {
 
     const model = controller.currentModel;
-    console.log(`Try to auto-sync at ${new Date()}`, { controller, model });
+    log(`Try to auto-sync at ${new Date()}`, { controller, model });
     if (!model) {
-        console.error("model is null");
+        log("model is null");
         return;
     }
     const remoteGraph = (await connection.pull()).data;
 
     const version = controller.run('getVersion', { controller, model })
     const workingTreeVersion = controller.run('getWorkingTreeVersion', { controller, model: controller.currentModel });
-    console.log({ remoteGraph, model, version, workingTreeVersion });
+    log({ remoteGraph, model, version, workingTreeVersion });
 
     const upload = async () => await uploadGraph({ controller, model, callback });
 
     if (remoteGraph === undefined) {
-        console.log("Failed to get remoteGraph");
+        log("Failed to get remoteGraph");
         return;
     }
 
     if (remoteGraph === null) {
-        console.log("The remote graph is null. Uploading the local graph.");
+        log("The remote graph is null. Uploading the local graph.");
         await upload();
         return;
     }
 
     if (remoteGraph.version === null) {
-        console.log("No remote version or current version");
+        log("No remote version or current version");
         await upload();
         return;
     }
     if (remoteGraph.version === version) {
-        console.log("The remote graph is the same as the local graph.")
+        log("The remote graph is the same as the local graph.")
         if (version === workingTreeVersion) {
-            console.log("No need to push data to the cloud because the working tree is the same.");
+            log("No need to push data to the cloud because the working tree is the same.");
         } else {
-            console.log("The local graph is updated based on the remote graph, uploading the local graph");
+            log("The local graph is updated based on the remote graph, uploading the local graph");
             await upload();
         }
         return;
     }
-    console.error("The remote graph conflicts with the local graph. Please try to take actions to resolve the conflicts!");
+    log("The remote graph conflicts with the local graph. Please try to take actions to resolve the conflicts!");
 }
 
 export function AutoSyncPlugin() {

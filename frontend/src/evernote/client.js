@@ -1,3 +1,5 @@
+import { log } from './log';
+
 export default class EvernoteClientProxy {
 
     constructor(endpoint) {
@@ -9,19 +11,19 @@ export default class EvernoteClientProxy {
         const url = `${this.endpoint}/${method}`;
         xhr.open("post", url, false);
         const paramString = new URLSearchParams(params).toString();
-        console.log({ params, paramString })
+        log({ params, paramString })
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(paramString);
         let res;
         if (xhr.readyState === 4){
             if((xhr.status>=200 && xhr.status<300) || xhr.status === 304){
-                console.log(xhr.responseText); // 请求成功
+                log(xhr.responseText); // 请求成功
                 res = JSON.parse(xhr.responseText);
             } else {
                 res = {error: 'Request was unsuccessful:' + xhr.status}
             }
         }
-        console.log(xhr)
+        log(xhr)
         return res;
     }
 
@@ -35,7 +37,7 @@ export default class EvernoteClientProxy {
             return ;
         }
         const paramString = new URLSearchParams(params).toString();
-        console.log({ params, paramString })
+        log({ params, paramString })
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4){
@@ -47,7 +49,7 @@ export default class EvernoteClientProxy {
             }
         }
         xhr.send(paramString);
-        console.log(xhr)
+        log(xhr)
     }
 
     getAllNoteList(params, sync=true, successCallback=null, failCallback=null) {

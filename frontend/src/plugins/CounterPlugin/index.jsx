@@ -1,6 +1,9 @@
 import React from "react";
+import { debug } from "debug";
 import { Button } from "@blueprintjs/core";
 import { retrieveResultFromNextNode } from "../../utils/retrieveResultFromNextNode";
+
+const log = debug("plugin:CounterPlugin")
 
 const CounterButton = (props) => {
   const { controller, model } = props;
@@ -18,7 +21,7 @@ export function CounterPlugin() {
   return {
     getAllTopicCount: (props) => {
       const { model } = props;
-      console.log('getAllTopicCount:', { model })
+      log('getAllTopicCount:', { model })
       return model.topics.size;
     },
     renderLeftBottomCorner: (props, next) => {

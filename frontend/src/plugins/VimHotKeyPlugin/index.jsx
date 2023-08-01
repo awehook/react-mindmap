@@ -1,6 +1,7 @@
+import { getKeyPath, getRelationship, TopicRelationship } from '@blink-mind/core';
+import { debug } from "debug";
 import '../../icon/index.css';
 import { FOCUS_MODE_SEARCH } from '../NewSearchPlugin/utils';
-import { getKeyPath, getRelationship, TopicRelationship } from '@blink-mind/core';
 
 import { FocusMode, OpType, } from "@blink-mind/core";
 import { empty, isTopicVisible } from '../../utils';
@@ -8,6 +9,8 @@ import { createJupyterNote, openJupyterNotebookFromTopic } from '../CreateJupyte
 import { hasJupyterNotebookAttached } from '../CreateJupyterNotebookPlugin/utils';
 import { OpType as EvernoteRelatedOpType } from '../EvernotePlugin';
 import { hasEvernoteAttached } from '../EvernotePlugin/utils';
+
+const log = debug("plugin:VimHotKeyPlugin");
 
 export const NewOpType = {
   FOCUS_TOPIC_AND_MOVE_TO_CENTER: "FOCUS_TOPIC_AND_MOVE_TO_CENTER",
@@ -217,10 +220,10 @@ export function VimHotKeyPlugin() {
         let nextSiblingKey;
         nextSiblingKey = getSiblingTopicKeyCrossParent(currentKey, model, offset);
         if (empty(nextSiblingKey) || !isTopicVisible(model, nextSiblingKey)) {
-          console.log(`nextSiblingKey of ${currentKey} is empty`);
+          log(`nextSiblingKey of ${currentKey} is empty`);
           nextSiblingKey = getSiblingTopicKey(currentKey, model, offset);
           if (empty(nextSiblingKey)) {
-            console.log(`nextSiblingKey of ${currentKey} is empty`);
+            log(`nextSiblingKey of ${currentKey} is empty`);
             return;
           }
         }

@@ -10,7 +10,7 @@ const log = debug("plugin:AutoSaveModelPlugin");
 
 function saveCache({ controller }, callback = () => { }) {
     const model = controller.currentModel;
-    console.log(`Auto-Saved at ${new Date()}`, { controller, model });
+    log(`Auto-Saved at ${new Date()}`, { controller, model });
     if (model) {
         const serializedModel = controller.run('serializeModel', { controller, model });
         localforage.setItem('react-mindmap-evernote-mind', JSON.stringify(serializedModel));
