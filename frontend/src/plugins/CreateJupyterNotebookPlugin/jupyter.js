@@ -55,16 +55,11 @@ export class JupyterClient
             parents: true
         }
         log({ payload })
-        try {
-            response = await this.instance.post(uri,
-                payload
-            );
-            console.log(response)
-        } catch (error) {
-            console.error(error);
-            return false;
-        }
-        return response.status == 200;
+        response = await this.instance.post(uri,
+            payload
+        );
+        console.log(response)
+        return response;
     }
 
     getActualUrl(path)

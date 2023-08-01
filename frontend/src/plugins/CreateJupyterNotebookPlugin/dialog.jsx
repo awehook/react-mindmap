@@ -1,12 +1,14 @@
-import { Dialog } from "@blueprintjs/core"
-import React from "react"
+import { Dialog } from "@blueprintjs/core";
+import { nonEmpty } from '../../utils';
+import React from "react";
 
-export const getDialog = ({ key, title, buttons }) => {
+export const getDialog = ({ key, title, content, buttons }) => {
     const dialogProps = {
         key,
         isOpen: true,
+        title,
         children: <>
-            { title }
+            {nonEmpty(content) && content}
             { buttons }
         </>
     }
