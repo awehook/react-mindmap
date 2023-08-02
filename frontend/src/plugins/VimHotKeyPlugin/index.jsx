@@ -5,7 +5,7 @@ import { FOCUS_MODE_SEARCH } from '../NewSearchPlugin/utils';
 
 import { FocusMode, OpType, } from "@blink-mind/core";
 import { empty, isTopicVisible } from '../../utils';
-import { createJupyterNote, openJupyterNotebookFromTopic } from '../CreateJupyterNotebookPlugin';
+import { createJupyterNoteWithPrecheck, openJupyterNotebookFromTopic } from '../CreateJupyterNotebookPlugin';
 import { hasJupyterNotebookAttached } from '../CreateJupyterNotebookPlugin/utils';
 import { OpType as EvernoteRelatedOpType } from '../EvernotePlugin';
 import { hasEvernoteAttached } from '../EvernotePlugin/utils';
@@ -487,7 +487,7 @@ export function VimHotKeyPlugin() {
             onKeyDown: (e) => {
               const { controller } = props;
               const model = controller.currentModel;
-              createJupyterNote({ controller, model, topicKey: model.focusKey });
+              createJupyterNoteWithPrecheck({ controller, model, topicKey: model.focusKey });
               e.stopImmediatePropagation();
               e.preventDefault();
             }

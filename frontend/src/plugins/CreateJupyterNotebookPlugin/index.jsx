@@ -165,22 +165,8 @@ const focusModeCallbacks = new Map([
 
 export const createJupyterNote = (props) => {
     const { controller, topicKey } = props;
-    const model = controller.currentModel;
-    log("create note is invoked")
-    if (model.getIn(["extData", "jupyter", topicKey])) {
-        alert("Can't associate jupyter note on a topic which already associates a jupyter note!")
-        return
-    }
-    if (model.getIn(["extData", "evernote", topicKey])) {
-        controller.run('operation', {
-            ...props,
-            opType: StandardOpType.SET_FOCUS_MODE,
-            focusMode: FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK
-        })
-        return
-    }
     const title = controller.run('getTopicTitle', props)
-    log("note title: ", title)
+    log("Creating jupyter notebook with title: ", title)
     const jupyter_notebook_path = generateRandomPath();
     jupyterClient.createNote(jupyter_notebook_path, title)
         .then(response => {
@@ -213,6 +199,25 @@ export const createJupyterNote = (props) => {
                     focusMode: FocusMode.FAILED_TO_CREATE_JUPYTER_NOTEBOOK
                 });
         });
+}
+
+export const createJupyterNoteWithPrecheck  = (props) => {
+    const { controller, topicKey } = props;
+    const model = controller.currentModel;
+    log("create note is invoked")
+    if (model.getIn(["extData", "jupyter", topicKey])) {
+        alert("Can't associate jupyter note on a topic which already associates a jupyter note!")
+        return
+    }
+    if (model.getIn(["extData", "evernote", topicKey])) {
+        controller.run('operation', {
+            ...props,
+            opType: StandardOpType.SET_FOCUS_MODE,
+            focusMode: FocusMode.CONFIRM_CREATE_JUPYTER_NOTEBOOK
+        })
+        return
+    }
+    createJupyterNote(props)
 }
 
 export function CreateJupyterNotebookPlugin() {
@@ -250,7 +255,7 @@ export function CreateJupyterNotebookPlugin() {
 
             const { topicKey, model, controller } = props;
 
-            const onClickCreateNoteItem = () => createJupyterNote(props)
+            const onClickCreateNoteItem = () => createJupyterNoteWithPrecheck(props)
 
             const onClickOpenJupyterNoteItem = () => openJupyterNotebookFromTopic(props)
 
