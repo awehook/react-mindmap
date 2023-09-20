@@ -1,10 +1,12 @@
-from urllib.parse import quote
+import functools
 import logging
-from retrying import retry
 import os
-import requests # type: ignore
-from requests import Session
 from typing import Optional
+from urllib.parse import quote
+
+import requests  # type: ignore
+from requests import Session
+from retrying import retry
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,7 @@ class JupyterClient:
 
     def _login_jupyter_server(self, password: str) -> Session:
         sess = requests.Session()
+        sess.request = functools.partial(sess.request, timeout=10)
         login_url = f"{self.base_url.rstrip('/')}/login"
         resp = sess.get(login_url)
         assert resp.status_code == 200, f"Authentication failed with status_code {resp.status_code}"
